@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBFAF6">
+<title>Eighty-Two — Philippine Province Log</title>
+<style>
+  :root{
+    --paper:#F2EFE7; --panel:#FBFAF6; --ink:#1B1D1A; --ink-2:#6E7169;
+    --rule:#DAD6CA; --rule-2:#E9E5DB;
+    --visited:#1B6B57; --clay:#B0674A; --unvisited:#E4E0D5;
+    --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+  }
+  a{color:var(--visited);text-decoration:none;border-bottom:1px solid var(--rule)}
+  a:hover{color:var(--clay);border-bottom-color:currentColor}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .app{display:grid;grid-template-rows:auto 1fr;height:100%}
+
+  header{
+    display:flex;align-items:baseline;gap:14px;
+    padding:16px 24px 14px;border-bottom:1px solid var(--rule);background:var(--panel);
+    padding-top:max(16px, env(safe-area-inset-top));
+  }
+  .wordmark{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .wordmark h1{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.005em;margin:0}
+  .wordmark span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+  header .spacer{flex:1}
+  .tools{display:flex;gap:6px;align-self:center;flex-wrap:wrap}
+  .ghost{
+    font:500 12px/1 var(--sans);padding:11px 13px;border:1px solid var(--rule);
+    border-radius:2px;background:transparent;color:var(--ink-2);cursor:pointer;min-height:38px;
+  }
+  .ghost:hover{color:var(--clay);border-color:var(--clay)}
+
+  .scrim{
+    position:fixed;inset:0;background:rgba(27,29,26,.34);z-index:30;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .scrim[hidden]{display:none}
+  .sheet{
+    background:var(--panel);border:1px solid var(--rule);border-radius:2px;
+    width:min(460px,100%);max-height:calc(100% - 24px);overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .sheet header{border-bottom:1px solid var(--rule);padding:18px 24px 15px;align-items:center}
+  .sheet h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.005em}
+  .sheet .x{
+    margin-left:auto;border:0;background:none;font-size:20px;line-height:1;color:var(--ink-2);
+    cursor:pointer;padding:4px 2px;min-height:38px;min-width:38px;
+  }
+  .sheet .x:hover{color:var(--clay)}
+  .sheet dl{margin:0;padding:6px 24px 22px}
+  .sheet dt{
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
+    padding:18px 0 6px;
+  }
+  .sheet dd{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink);text-wrap:pretty}
+  .sheet dd + dd{margin-top:7px}
+  .sheet dd small{display:block;margin-top:5px;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+  .sheet .sig{
+    border-top:1px solid var(--rule);padding:16px 24px;display:flex;gap:10px;
+    align-items:baseline;font-size:12px;color:var(--ink-2);
+  }
+  .sheet .sig b{font-weight:600;color:var(--ink);font-size:12.5px}
+
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+    background:var(--ink);color:var(--paper);padding:10px 15px;border-radius:2px;
+    font-size:12.5px;opacity:0;pointer-events:none;
+    transition:opacity .18s,transform .18s;z-index:20;max-width:calc(100% - 32px);text-align:center;
+  }
+  #toast.up{opacity:1;transform:translate(-50%,0)}
+
+  main{display:grid;grid-template-columns:1fr 372px;min-height:0}
+  .stage{position:relative;min-width:0;overflow:hidden}
+  #svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
+  .prov{transition:fill .4s ease;stroke:#C7C2B4;stroke-width:.7px;vector-effect:non-scaling-stroke}
+  .prov.on{fill:var(--visited)}
+  .prov.off{fill:var(--unvisited)}
+  .prov.hot{stroke:var(--ink);stroke-width:1.4px}
+  .burst{fill:none;stroke:var(--visited);vector-effect:non-scaling-stroke}
+
+  .readout{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;pointer-events:none;padding:14px 16px 0}
+  .readout b{
+    background:var(--ink);color:var(--paper);padding:7px 12px;border-radius:2px;
+    font-size:12.5px;font-weight:500;opacity:0;transition:opacity .15s;
+    display:flex;gap:9px;align-items:baseline;max-width:100%;
+  }
+  .readout b em{font-style:normal;color:#A7ADA4;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase}
+
+  .hud{position:absolute;left:18px;bottom:16px;display:flex;flex-direction:column;gap:9px}
+  .hud .hint{font-size:11.5px;color:var(--ink-2);max-width:240px;text-wrap:pretty}
+  .zoom{display:flex;gap:6px}
+  .zoom button{
+    width:40px;height:40px;border:1px solid var(--rule);background:var(--panel);
+    color:var(--ink);cursor:pointer;border-radius:2px;font-size:16px;line-height:1;
+    display:grid;place-content:center;
+  }
+  .zoom button:hover{border-color:var(--clay);color:var(--clay)}
+  .zoom .wide{width:auto;padding:0 13px;font-size:11px;letter-spacing:.06em}
+
+  aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+  .tally{padding:24px 24px 20px;border-bottom:1px solid var(--rule)}
+  .tally .big{display:flex;align-items:baseline;gap:8px}
+  .tally .big b{font-family:var(--serif);font-size:60px;font-weight:600;letter-spacing:-.01em;line-height:.9}
+  .tally .big i{font-family:var(--serif);font-style:normal;font-size:19px;color:var(--ink-2)}
+  .tally .cap{margin-top:9px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+  .meter{margin-top:14px;height:3px;background:var(--rule-2);position:relative}
+  .meter i{position:absolute;inset:0 auto 0 0;background:var(--visited);transition:width .5s ease}
+  .nickrow{display:flex;align-items:baseline;gap:10px;margin-top:14px}
+  .nickrow span{
+    flex:none;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
+  }
+  .nick{
+    flex:1;min-width:0;border:0;border-bottom:1px solid transparent;background:transparent;
+    font:400 12.5px var(--sans);color:var(--ink);
+    outline:none;padding:4px 0;min-height:28px;text-overflow:ellipsis;
+  }
+  .nick::placeholder{color:#BFBCB1}
+  .nick:hover{border-bottom-color:var(--rule)}
+  .nick:focus{border-bottom-color:var(--clay);color:var(--ink)}
+
+  .islands{padding:18px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:13px}
+  .isl{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:baseline}
+  .isl .nm{font-size:12.5px;font-weight:500}
+  .isl .ct{font-size:11.5px;color:var(--ink-2)}
+  .isl .bar{grid-column:1/-1;height:2px;background:var(--rule-2);position:relative}
+  .isl .bar i{position:absolute;inset:0 auto 0 0;background:var(--ink);transition:width .5s ease}
+
+  .listhead{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .listhead input{
+    flex:1;min-width:130px;border:0;background:transparent;font:400 15px var(--sans);color:var(--ink);
+    outline:none;padding:6px 0;min-height:34px;
+  }
+  .listhead input::placeholder{color:#A9A79D}
+  .listhead .n{font-size:11px;color:var(--ink-2);letter-spacing:.08em}
+  .seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-left:auto}
+  .seg button{
+    font:500 10px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;
+    padding:10px 11px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;
+    min-height:34px;-webkit-tap-highlight-color:transparent;
+  }
+  .seg button + button{border-left:1px solid var(--rule)}
+  .seg button:hover{color:var(--clay)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+  .list{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+  .grp{padding:16px 24px 5px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+  .row{
+    display:grid;grid-template-columns:16px 1fr auto;gap:12px;align-items:center;
+    padding:0 24px;min-height:48px;cursor:pointer;border:0;border-bottom:1px solid var(--rule-2);
+    background:none;width:100%;text-align:left;font:inherit;color:inherit;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .row:hover{background:#F4F1E9}
+  .row:active{background:#EDE9DF}
+  .row .tick{width:16px;height:16px;border:1px solid var(--rule);border-radius:1px;position:relative;background:#fff}
+  .row[data-on="1"] .tick{background:var(--visited);border-color:var(--visited)}
+  .row[data-on="1"] .tick::after{content:"";position:absolute;left:3.5px;top:7px;width:5px;height:2px;background:#fff;transform:rotate(45deg)}
+  .row[data-on="1"] .tick::before{content:"";position:absolute;left:6.5px;top:4px;width:2px;height:8px;background:#fff;transform:rotate(45deg)}
+  .row .nm{font-size:14px}
+  .row[data-on="1"] .nm{color:var(--ink-2)}
+  .row .rg{font-size:10.5px;color:#A9A79D}
+
+  @media (max-width:1000px){
+    .app{height:auto;min-height:100%}
+    main{grid-template-columns:1fr;grid-template-rows:auto auto}
+    .stage{height:52vh;min-height:320px}
+    aside{border-left:0;border-top:1px solid var(--rule)}
+    .list{overflow:visible;flex:none}
+    .hud .hint{display:none}
+  }
+  @media (max-width:600px){
+    header{padding:14px 18px 12px;gap:10px;flex-wrap:wrap}
+    header .spacer{display:none}
+    .wordmark h1{font-size:17px}
+    .wordmark span{display:none}
+    .tools{width:100%;gap:5px}
+    .tools .ghost{flex:1 1 auto;min-width:92px;padding:11px 4px;font-size:11px}
+    .sheet dl{padding:4px 18px 20px}
+    .sheet header{padding:16px 18px 13px}
+    .sheet .sig{padding:14px 18px}
+    .stage{height:46vh;min-height:290px}
+    .hud{left:14px;bottom:12px}
+    .tally{padding:20px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
+    .tally .big{grid-row:1/3}
+    .tally .big b{font-size:46px}
+    .tally .cap{margin-top:0;align-self:end}
+    .meter{grid-column:2;margin-top:8px;align-self:start}
+    .nickrow{grid-column:1/-1;margin-top:8px}
+    .islands{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .listhead{padding:10px 18px}
+    .seg button{padding:10px 9px}
+    .grp{padding:14px 18px 5px}
+    .row{padding:0 18px;min-height:52px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="wordmark">
+      <h1>Eighty&#8209;Two</h1>
+      <span>Philippine province log</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="tools">
+      <button class="ghost" id="export">Save file</button>
+      <button class="ghost" id="png">Save image</button>
+      <button class="ghost" id="import">Load file</button>
+      <button class="ghost" id="reset">Clear</button>
+      <button class="ghost" id="about">About</button>
+    </div>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+  </header>
+
+  <main>
+    <div class="stage">
+      <svg id="svg" aria-label="Map of the Philippines by province"></svg>
+      <div class="readout"><b id="readout"></b></div>
+      <div class="hud">
+        <div class="zoom">
+          <button id="z-in" aria-label="Zoom in">+</button>
+          <button id="z-out" aria-label="Zoom out">&minus;</button>
+          <button id="z-reset" class="wide" aria-label="Reset view">FIT</button>
+        </div>
+        <div class="hint">Tap a province to stamp it. Pinch or scroll to zoom, drag to pan.</div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="tally">
+        <div class="big"><b class="mono" id="count">0</b><i class="mono">/ 82</i></div>
+        <div class="cap" id="pct">0% of the archipelago</div>
+        <div class="meter"><i id="meter" style="width:0%"></i></div>
+        <label class="nickrow" for="nick"><span>Nickname</span>
+          <input id="nick" class="nick" type="text" maxlength="24" autocomplete="off"
+            placeholder="Abi&rsquo;s"></label>
+      </div>
+      <div class="islands" id="islands"></div>
+      <div class="listhead">
+        <input id="q" type="search" placeholder="Find a province" autocomplete="off" autocapitalize="none">
+        <span class="n mono" id="qn"></span>
+        <div class="seg" id="groupby" role="group" aria-label="Group the list by">
+          <button type="button" data-mode="island" aria-pressed="true">Island</button>
+          <button type="button" data-mode="region" aria-pressed="false">Region</button>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+    </aside>
+  </main>
+</div>
+<div id="toast" role="status"></div>
+
+<div class="scrim" id="aboutbox" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="about-h">
+    <header>
+      <h2 id="about-h">About this map</h2>
+      <button class="x" id="about-close" aria-label="Close">&times;</button>
+    </header>
+    <dl>
+      <dt>How to use</dt>
+      <dd><b>Stamp a province</b> by tapping it on the map, or by tapping its row in the list.
+        Tap it again to take the stamp off.
+        <small>Stamped provinces turn green on the map and show a tick in the list. The count,
+        the percentage and the island bars all follow along.</small></dd>
+      <dd><b>Move the map</b> by dragging to pan, and scrolling or pinching to zoom.
+        The <b>+</b> and <b>&minus;</b> buttons zoom as well, and <b>FIT</b> returns to the whole archipelago.</dd>
+      <dd><b>Name your log</b> with a nickname in the field under the counter. Put in
+        <i>Abi&rsquo;s</i> and the log is titled <i>Abi&rsquo;s PH travel log</i> &mdash; on the page,
+        in the browser tab, and as the heading on the saved image. The nickname travels inside
+        the saved file too.
+        <small>It is kept in this browser like everything else. Leave it empty and the page
+        goes back to being called Eighty&#8209;Two.</small></dd>
+      <dd><b>Work the list</b> by typing part of a name in <b>Find a province</b> to narrow it,
+        and switching between <b>Island</b> and <b>Region</b> to group it by island group
+        or by administrative region.</dd>
+      <dd><b>Keep a copy</b> with the buttons at the top. <b>Save file</b> writes your log out as a
+        JSON file and <b>Load file</b> reads one back in. <b>Save image</b> draws your map as a PNG
+        to keep or post. <b>Clear</b> empties the log.
+        <small>Loading a file replaces whatever is currently stamped in this browser, so save a
+        copy first if you want to keep it. The saved file is also how you carry your log to
+        another device.</small></dd>
+
+      <dt>Where your log is kept</dt>
+      <dd>In this browser, on this device. Nothing is uploaded and there is no account.
+        <small>Clearing your browser data will erase it. Use <b>Save file</b> to keep a copy
+        and to carry your map to another device.</small></dd>
+
+      <dt>The count of 82</dt>
+      <dd>This map follows the 2023 Philippine Standard Geographic Code list of provinces,
+        which is where the figure of 82 comes from.
+        <small>The number is not settled. Maguindanao was split into two provinces in 2022,
+        and other splits and mergers are proposed regularly. Metro Manila is not a province
+        and is not counted here.</small></dd>
+
+      <dt>Boundary data</dt>
+      <dd>Province boundaries from <b>faeldon/philippines-json-maps</b>, used under the MIT License.
+        <small>Simplified to roughly one kilometre of detail so the map loads instantly.
+        Coastlines are approximate and small islets are omitted.
+        <b>Not for navigation, legal, or any official purpose.</b></small></dd>
+
+      <dd>Boundaries shown here are illustrative and reflect the source data as published.
+        They do not represent any position on territorial or maritime claims, and no
+        maritime boundaries are shown.
+        <small>Where a boundary is disputed or has recently changed, this map may not
+        reflect the current or correct line.</small></dd>
+
+      <dt>Terms of use</dt>
+      <dd>This map is provided as is, free of charge, with no warranty of any kind.
+        <small>Your log is stored only by your own browser, so we cannot recover it and are
+        not responsible for its loss. Keep your own copy with <b>Save file</b>. This site may
+        change or be discontinued at any time.</small></dd>
+
+      <dt>License notice</dt>
+      <dd><small>The MIT License permission notice is retained in <b>provinces.js</b>,
+        which ships with this page.</small></dd>
+    </dl>
+    <div class="sig">Built by <b>Dev Abi</b></div>
+  </div>
+</div>
+
+<script src="provinces.js"></script>
+<script>
+const SAVE_KEY = "ph82.visited.v1";
+const NICK_KEY = "ph82.nickname.v1";
+const APP_NAME = "Eighty\u2011Two";
+const APP_TITLE = "Eighty-Two \u2014 Philippine Province Log";
+const UNDATED = "undated";
+const NS = "http://www.w3.org/2000/svg";
+const AB = window.PH82_ALPHABET;
+const IDX = {}; for(let i=0;i<AB.length;i++) IDX[AB[i]] = i;
+
+const GROUP_KEY = "ph82.groupby.v1";
+const ISLANDS = ["Luzon","Visayas","Mindanao"];
+
+const els = {
+  svg:document.getElementById('svg'), stage:document.querySelector('.stage'),
+  readout:document.getElementById('readout'),
+  count:document.getElementById('count'), pct:document.getElementById('pct'),
+  meter:document.getElementById('meter'), islands:document.getElementById('islands'),
+  list:document.getElementById('list'), q:document.getElementById('q'), qn:document.getElementById('qn'),
+  groupby:document.getElementById('groupby'), nick:document.getElementById('nick'),
+  h1:document.querySelector('.wordmark h1')
+};
+
+let visited = loadSave();
+let groupBy = loadGroupBy();
+let nickname = loadNick();
+let provinces = [];
+let gRoot, gStamp, hot = null;
+let view = {k:1, x:0, y:0}, base = null;
+
+function loadSave(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(visited)); }catch(e){} }
+function stampLabel(v){ return v && v !== UNDATED ? "stamped " + v : "stamped"; }
+function loadNick(){
+  try{ return (localStorage.getItem(NICK_KEY) || "").slice(0,24); }catch(e){ return ""; }
+}
+function setNick(v){
+  nickname = String(v || "").replace(/\s+/g," ").trim().slice(0,24);
+  try{ nickname ? localStorage.setItem(NICK_KEY, nickname) : localStorage.removeItem(NICK_KEY); }catch(e){}
+  applyNick();
+}
+/* the nickname titles the log: "Abi's" becomes "Abi's PH travel log" */
+function logTitle(){ return nickname ? nickname + " PH travel log" : ""; }
+function applyNick(){
+  els.h1.textContent = logTitle() || APP_NAME;
+  document.title = logTitle() || APP_TITLE;
+}
+function loadGroupBy(){
+  try{ return localStorage.getItem(GROUP_KEY) === "region" ? "region" : "island"; }catch(e){ return "island"; }
+}
+
+/* ── geometry ── */
+function decode(s){
+  const pts = []; let i = 0, x = 0, y = 0;
+  while(i < s.length){
+    let shift = 0, res = 0, c;
+    do{ c = IDX[s[i++]]; res += (c & 31) * Math.pow(32, shift); shift++; } while(c >= 32);
+    x += (res & 1) ? -(res + 1) / 2 : res / 2;
+    shift = 0; res = 0;
+    do{ c = IDX[s[i++]]; res += (c & 31) * Math.pow(32, shift); shift++; } while(c >= 32);
+    y += (res & 1) ? -(res + 1) / 2 : res / 2;
+    pts.push([x/1000, y/1000]);
+  }
+  return pts;
+}
+const RAD = Math.PI/180;
+function merc(lon,lat){
+  return [lon*RAD, Math.log(Math.tan(Math.PI/4 + Math.max(-85,Math.min(85,lat))*RAD/2))];
+}
+
+function prepare(){
+  provinces = window.PH82.map(p=>({
+    name:p.n, region:p.r, island:p.i, id:String(p.id),
+    rings:p.g.map(g=>decode(g).map(c=>merc(c[0],c[1])))
+  }));
+}
+
+function fit(){
+  const w = els.stage.clientWidth, h = els.stage.clientHeight;
+  const pad = w < 600 ? 14 : 24;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  provinces.forEach(p=>p.rings.forEach(r=>r.forEach(c=>{
+    if(c[0]<x0)x0=c[0]; if(c[0]>x1)x1=c[0]; if(c[1]<y0)y0=c[1]; if(c[1]>y1)y1=c[1];
+  })));
+  const s = Math.min((w-2*pad)/(x1-x0), (h-2*pad)/(y1-y0));
+  base = {s, tx:(w-(x1-x0)*s)/2 - x0*s, ty:(h+(y1+ -y0)*0 )/2 + y1*s + ( (h-(y1-y0)*s)/2 - (h)/2 )};
+  base.ty = (h-(y1-y0)*s)/2 + y1*s;
+  provinces.forEach(p=>{
+    let d = "", best = null, bestLen = -1, cx = 0, cy = 0;
+    p.rings.forEach(r=>{
+      d += "M";
+      r.forEach((c,i)=>{ d += (i?"L":"") + (c[0]*base.s + base.tx).toFixed(1) + " " + (base.ty - c[1]*base.s).toFixed(1); });
+      d += "Z";
+      if(r.length > bestLen){ bestLen = r.length; best = r; }
+    });
+    best.forEach(c=>{ cx += c[0]*base.s + base.tx; cy += base.ty - c[1]*base.s; });
+    p.d = d; p.c = [cx/best.length, cy/best.length];
+  });
+}
+
+function drawMap(){
+  els.svg.textContent = "";
+  gRoot = document.createElementNS(NS,"g");
+  els.svg.appendChild(gRoot);
+  provinces.forEach(p=>{
+    const el = document.createElementNS(NS,"path");
+    el.setAttribute("d", p.d);
+    el.setAttribute("class", "prov " + (visited[p.id] ? "on" : "off"));
+    el.setAttribute("data-id", p.id);
+    p.el = el;
+    gRoot.appendChild(el);
+  });
+  gStamp = document.createElementNS(NS,"g");
+  gStamp.setAttribute("pointer-events","none");
+  gRoot.appendChild(gStamp);
+  applyView();
+}
+function applyView(){
+  gRoot.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");
+}
+function relayout(){
+  if(!els.stage.clientWidth || !els.stage.clientHeight) return;
+  fit();
+  provinces.forEach(p=>p.el.setAttribute("d", p.d));
+}
+
+/* ── stamping ── */
+function setHot(p){
+  if(hot === p) return;
+  if(hot) hot.el.classList.remove('hot');
+  hot = p;
+  if(!p){ els.readout.style.opacity = 0; return; }
+  p.el.classList.add('hot');
+  gRoot.insertBefore(p.el, gStamp);
+  els.readout.textContent = "";
+  const b = document.createElement('span'); b.textContent = p.name;
+  const e = document.createElement('em');
+  e.textContent = visited[p.id] ? stampLabel(visited[p.id]) : p.region;
+  els.readout.append(b, e);
+  els.readout.style.opacity = 1;
+}
+function mark(id, on){
+  const p = provinces.find(x=>x.id===id); if(!p) return;
+  if(on === !!visited[id]) return;
+  if(on) visited[id] = new Date().toISOString().slice(0,10); else delete visited[id];
+  save();
+  p.el.classList.toggle('on', on); p.el.classList.toggle('off', !on);
+  if(on) burst(p);
+  const row = els.list.querySelector('.row[data-id="'+id+'"]');
+  if(row) row.dataset.on = on ? "1" : "0";
+  if(hot === p){ hot = null; setHot(p); }
+  paintStats();
+}
+function burst(p){
+  const c = document.createElementNS(NS,"circle");
+  c.setAttribute("class","burst");
+  c.setAttribute("cx", p.c[0]); c.setAttribute("cy", p.c[1]);
+  gStamp.appendChild(c);
+  const t0 = performance.now(), dur = 520, k = view.k;
+  (function step(t){
+    const u = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-u,3);
+    c.setAttribute("r", (1 + e*26)/k);
+    c.setAttribute("stroke-width", (2 - 1.7*e));
+    c.style.opacity = String(1-e);
+    if(u<1) requestAnimationFrame(step); else c.remove();
+  })(t0);
+}
+
+/* ── pan / zoom / tap ── */
+function clampK(k){ return Math.max(1, Math.min(16, k)); }
+function zoomAt(px, py, factor){
+  const nk = clampK(view.k*factor);
+  const f = nk/view.k;
+  view.x = px - (px - view.x)*f;
+  view.y = py - (py - view.y)*f;
+  view.k = nk;
+  if(view.k === 1){ view.x = 0; view.y = 0; }
+  applyView();
+}
+const pointers = new Map();
+let dragged = false, startDist = 0, startK = 1, downT = 0;
+
+els.svg.addEventListener('pointerdown', e=>{
+  els.svg.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY, ox:e.clientX, oy:e.clientY});
+  if(pointers.size === 1){ dragged = false; downT = performance.now(); }
+  if(pointers.size === 2){
+    const [a,b] = [...pointers.values()];
+    startDist = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    startK = view.k;
+  }
+});
+els.svg.addEventListener('pointermove', e=>{
+  const rect = els.svg.getBoundingClientRect();
+  if(!pointers.has(e.pointerId)){
+    if(e.pointerType === "mouse"){
+      const t = document.elementFromPoint(e.clientX, e.clientY);
+      setHot(t && t.classList.contains('prov') ? provinces.find(p=>p.el===t) : null);
+    }
+    return;
+  }
+  const pt = pointers.get(e.pointerId);
+  const dx = e.clientX - pt.x, dy = e.clientY - pt.y;
+  pt.x = e.clientX; pt.y = e.clientY;
+  if(Math.hypot(e.clientX-pt.ox, e.clientY-pt.oy) > 6) dragged = true;
+  if(pointers.size === 1){
+    view.x += dx; view.y += dy; applyView();
+  } else if(pointers.size === 2){
+    const [a,b] = [...pointers.values()];
+    const d = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    const mx = (a.x+b.x)/2 - rect.left, my = (a.y+b.y)/2 - rect.top;
+    zoomAt(mx, my, clampK(startK*(d/startDist))/view.k);
+  }
+});
+function endPointer(e){ pointers.delete(e.pointerId); }
+els.svg.addEventListener('pointerup', endPointer);
+els.svg.addEventListener('pointercancel', endPointer);
+els.svg.addEventListener('pointerleave', e=>{ if(e.pointerType==="mouse" && !pointers.size) setHot(null); });
+
+els.svg.addEventListener('click', e=>{
+  if(dragged || performance.now()-downT > 700) return;
+  const t = e.target;
+  if(!t.classList || !t.classList.contains('prov')) return;
+  const p = provinces.find(x=>x.el===t); if(!p) return;
+  setHot(p);
+  mark(p.id, !visited[p.id]);
+});
+els.svg.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const r = els.svg.getBoundingClientRect();
+  zoomAt(e.clientX-r.left, e.clientY-r.top, Math.pow(0.998, e.deltaY));
+}, {passive:false});
+
+function zoomButton(factor){
+  const r = els.svg.getBoundingClientRect();
+  zoomAt(r.width/2, r.height/2, factor);
+}
+document.getElementById('z-in').onclick = ()=> zoomButton(1.7);
+document.getElementById('z-out').onclick = ()=> zoomButton(1/1.7);
+document.getElementById('z-reset').onclick = ()=>{ view = {k:1,x:0,y:0}; applyView(); };
+
+/* ── sidebar ── */
+/* Regions run in island order, then by PSGC code so they read in the official sequence. */
+function groupNames(){
+  if(groupBy !== "region") return ISLANDS.slice();
+  const seen = new Map();
+  provinces.forEach(p=>{
+    const code = Number(p.id);
+    const g = seen.get(p.region);
+    if(!g) seen.set(p.region, {name:p.region, island:p.island, code:code});
+    else if(code < g.code) g.code = code;
+  });
+  return [...seen.values()]
+    .sort((a,b)=> ISLANDS.indexOf(a.island) - ISLANDS.indexOf(b.island) || a.code - b.code)
+    .map(g=>g.name);
+}
+function buildList(){
+  els.list.textContent = "";
+  const key = groupBy === "region" ? (p=>p.region) : (p=>p.island);
+  groupNames().forEach((g,gi)=>{
+    const gk = "g" + gi;
+    const h = document.createElement('div'); h.className="grp"; h.textContent = g; h.dataset.grp=gk;
+    els.list.appendChild(h);
+    provinces.filter(p=>key(p)===g).forEach(p=>{
+      const b = document.createElement('button');
+      b.className="row"; b.dataset.id=p.id; b.dataset.grp=gk;
+      b.dataset.on = visited[p.id] ? "1":"0";
+      b.dataset.name = p.name.toLowerCase();
+      b.innerHTML = '<span class="tick"></span><span class="nm"></span><span class="rg"></span>';
+      b.querySelector('.nm').textContent = p.name;
+      b.querySelector('.rg').textContent = groupBy === "region" ? p.island : p.region;
+      b.onclick = ()=> mark(p.id, b.dataset.on!=="1");
+      b.onmouseenter = ()=>{ setHot(p); els.readout.style.opacity = 0; };
+      b.onmouseleave = ()=> setHot(null);
+      els.list.appendChild(b);
+    });
+  });
+  filterList();
+}
+function syncGroupToggle(){
+  els.groupby.querySelectorAll('button').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.mode === groupBy));
+  });
+}
+els.groupby.addEventListener('click', e=>{
+  const b = e.target.closest('button[data-mode]');
+  if(!b || b.dataset.mode === groupBy) return;
+  groupBy = b.dataset.mode;
+  try{ localStorage.setItem(GROUP_KEY, groupBy); }catch(err){}
+  syncGroupToggle();
+  buildList();
+  els.list.scrollTop = 0;
+});
+els.nick.value = nickname;
+applyNick();
+els.nick.addEventListener('input', ()=> setNick(els.nick.value));
+els.nick.addEventListener('blur', ()=>{ els.nick.value = nickname; });
+
+els.q.addEventListener('input', filterList);
+function filterList(){
+  const q = els.q.value.trim().toLowerCase();
+  let n = 0;
+  els.list.querySelectorAll('.row').forEach(r=>{
+    const show = !q || r.dataset.name.includes(q);
+    r.style.display = show ? "" : "none"; if(show) n++;
+  });
+  els.list.querySelectorAll('.grp').forEach(h=>{
+    const any = [...els.list.querySelectorAll('.row[data-grp="'+h.dataset.grp+'"]')].some(r=>r.style.display!=="none");
+    h.style.display = any ? "" : "none";
+  });
+  els.qn.textContent = q ? n+" match"+(n===1?"":"es") : "";
+}
+
+function paintStats(){
+  const total = provinces.length || 82;
+  const n = provinces.filter(p=>visited[p.id]).length;
+  els.count.textContent = String(n);
+  els.meter.style.width = (n/total*100)+"%";
+  els.pct.textContent = Math.round(n/total*100) + "% of the archipelago";
+  els.islands.textContent = "";
+  ["Luzon","Visayas","Mindanao"].forEach(g=>{
+    const inG = provinces.filter(p=>p.island===g);
+    const done = inG.filter(p=>visited[p.id]).length;
+    const d = document.createElement('div'); d.className="isl";
+    d.innerHTML = '<span class="nm"></span><span class="ct mono"></span><span class="bar"><i></i></span>';
+    d.querySelector('.nm').textContent = g;
+    d.querySelector('.ct').textContent = done + " / " + inG.length;
+    d.querySelector('.bar i').style.width = (inG.length? done/inG.length*100 : 0) + "%";
+    els.islands.appendChild(d);
+  });
+}
+
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('up');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('up'), 2600);
+}
+function repaintAll(){
+  provinces.forEach(p=>{
+    p.el.classList.toggle('on', !!visited[p.id]);
+    p.el.classList.toggle('off', !visited[p.id]);
+  });
+  els.list.querySelectorAll('.row').forEach(r=>{ r.dataset.on = visited[r.dataset.id] ? "1" : "0"; });
+  setHot(null); paintStats();
+}
+
+/* ── save as image: lay the map out afresh at poster size, then rasterise ── */
+const PAPER="#F2EFE7", INK="#1B1D1A", INK2="#6E7169", RULE="#DAD6CA";
+const SANS="'Helvetica Neue',Helvetica,Arial,sans-serif";
+const SERIF="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif";
+
+function slugName(){
+  const t = (logTitle() || "eighty-two").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  return t || "eighty-two";
+}
+function mk(tag, attrs, text){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(text != null) e.textContent = text;
+  return e;
+}
+function poster(){
+  const PAD = 84, MAP_H = 1240, HEAD = 172, FOOT = 232;
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  provinces.forEach(p=>p.rings.forEach(r=>r.forEach(c=>{
+    if(c[0]<x0)x0=c[0]; if(c[0]>x1)x1=c[0]; if(c[1]<y0)y0=c[1]; if(c[1]>y1)y1=c[1];
+  })));
+  const s = MAP_H/(y1-y0), mapW = (x1-x0)*s;
+  const W = Math.round(mapW + PAD*2), H = Math.round(HEAD + MAP_H + FOOT);
+  const tx = PAD - x0*s, ty = HEAD + y1*s;
+  const mid = W/2;
+
+  const svg = mk("svg",{xmlns:NS, width:W, height:H, viewBox:"0 0 "+W+" "+H});
+  svg.appendChild(mk("rect",{x:0,y:0,width:W,height:H,fill:PAPER}));
+  const title = logTitle() || "Eighty-Two";
+  const tsize = Math.max(24, Math.min(44, Math.round(1400/Math.max(12, title.length))));
+  svg.appendChild(mk("text",{x:mid,y:74,"text-anchor":"middle","font-family":SERIF,
+    "font-size":tsize,"font-weight":600,fill:INK}, title));
+  svg.appendChild(mk("text",{x:mid,y:106,"text-anchor":"middle","font-family":SANS,
+    "font-size":13,"letter-spacing":2.4,fill:INK2},"PHILIPPINE PROVINCE LOG"));
+  svg.appendChild(mk("line",{x1:PAD,y1:HEAD-36,x2:W-PAD,y2:HEAD-36,stroke:RULE,"stroke-width":1}));
+
+  provinces.forEach(p=>{
+    let d = "";
+    p.rings.forEach(r=>{
+      d += "M";
+      r.forEach((c,i)=>{ d += (i?"L":"") + (c[0]*s + tx).toFixed(1) + " " + (ty - c[1]*s).toFixed(1); });
+      d += "Z";
+    });
+    svg.appendChild(mk("path",{d:d, fill:visited[p.id] ? "#1B6B57" : "#E4E0D5",
+      stroke:"#C7C2B4","stroke-width":0.8}));
+  });
+
+  const n = provinces.filter(p=>visited[p.id]).length, total = provinces.length || 82;
+  const fy = HEAD + MAP_H + 74;
+  svg.appendChild(mk("line",{x1:PAD,y1:fy-58,x2:W-PAD,y2:fy-58,stroke:RULE,"stroke-width":1}));
+  svg.appendChild(mk("text",{x:mid,y:fy,"text-anchor":"middle","font-family":SERIF,
+    "font-size":60,"font-weight":600,fill:INK}, n + " / " + total));
+  svg.appendChild(mk("text",{x:mid,y:fy+34,"text-anchor":"middle","font-family":SANS,
+    "font-size":13,"letter-spacing":2.4,fill:INK2},
+    Math.round(n/total*100) + "% OF THE ARCHIPELAGO"));
+  const parts = ISLANDS.map(g=>{
+    const inG = provinces.filter(p=>p.island===g);
+    return g.toUpperCase() + " " + inG.filter(p=>visited[p.id]).length + " / " + inG.length;
+  });
+  svg.appendChild(mk("text",{x:mid,y:fy+76,"text-anchor":"middle","font-family":SANS,
+    "font-size":12.5,"letter-spacing":1.8,fill:INK2}, parts.join("  \u00B7  ")));
+  svg.appendChild(mk("text",{x:mid,y:fy+118,"text-anchor":"middle","font-family":SANS,
+    "font-size":11.5,"letter-spacing":1.6,fill:"#A9A79D"},
+    new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"}).toUpperCase()));
+
+  return {svg, W, H};
+}
+document.getElementById('png').onclick = ()=>{
+  let url;
+  try{
+    const {svg, W, H} = poster();
+    const src = "data:image/svg+xml;charset=utf-8," +
+      encodeURIComponent(new XMLSerializer().serializeToString(svg));
+    const img = new Image();
+    img.onload = ()=>{
+      try{
+        const k = 2, cv = document.createElement('canvas');
+        cv.width = W*k; cv.height = H*k;
+        const ctx = cv.getContext('2d');
+        ctx.fillStyle = PAPER; ctx.fillRect(0,0,cv.width,cv.height);
+        ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        cv.toBlob(b=>{
+          if(!b){ toast("The image could not be created"); return; }
+          const a = document.createElement('a');
+          url = URL.createObjectURL(b);
+          a.href = url;
+          a.download = slugName() + "-map-" + new Date().toISOString().slice(0,10) + ".png";
+          a.click();
+          setTimeout(()=>URL.revokeObjectURL(url), 4000);
+          toast("Saved an image of your map");
+        }, "image/png");
+      }catch(e){ toast("The image could not be created"); }
+    };
+    img.onerror = ()=> toast("The image could not be created");
+    img.src = src;
+  }catch(e){ toast("The image could not be created"); }
+};
+
+document.getElementById('export').onclick = ()=>{
+  const rows = provinces.filter(p=>visited[p.id]).map(p=>({
+    id:p.id, name:p.name, region:p.region, island:p.island, date:visited[p.id]
+  }));
+  const blob = new Blob([JSON.stringify({
+    app:"eighty-two", version:1, exported:new Date().toISOString(),
+    nickname:nickname, count:rows.length, total:provinces.length, provinces:rows
+  }, null, 2)], {type:"application/json"});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = slugName() + "-log-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast("Saved "+rows.length+" provinces to a file");
+};
+document.getElementById('import').onclick = ()=> document.getElementById('file').click();
+document.getElementById('file').onchange = e=>{
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const j = JSON.parse(r.result);
+      const list = Array.isArray(j) ? j : j.provinces;
+      if(!Array.isArray(list)) throw new Error("no province list");
+      const known = new Set(provinces.map(p=>p.id));
+      const next = {}; let skipped = 0;
+      list.forEach(p=>{
+        const id = String(p.id || "");
+        if(known.has(id)) next[id] = p.date || UNDATED; else skipped++;
+      });
+      visited = next; save();
+      if(typeof j.nickname === "string"){ setNick(j.nickname); els.nick.value = nickname; }
+      repaintAll();
+      toast("Loaded "+Object.keys(next).length+" provinces" + (skipped ? " — "+skipped+" unrecognised" : ""));
+    }catch(err){ toast("That file is not an Eighty-Two log"); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+};
+document.getElementById('reset').onclick = ()=>{
+  if(!Object.keys(visited).length) return;
+  if(!confirm("Clear all stamped provinces?")) return;
+  visited = {}; save(); repaintAll();
+  toast("Log cleared");
+};
+
+const aboutBox = document.getElementById('aboutbox');
+function showAbout(on){
+  aboutBox.hidden = !on;
+  if(on) document.getElementById('about-close').focus();
+}
+document.getElementById('about').onclick = ()=> showAbout(true);
+document.getElementById('about-close').onclick = ()=> showAbout(false);
+aboutBox.onclick = e=>{ if(e.target === aboutBox) showAbout(false); };
+document.addEventListener('keydown', e=>{ if(e.key === "Escape") showAbout(false); });
+
+let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(relayout, 150); });
+if(window.ResizeObserver){
+  let ro = null;
+  ro = new ResizeObserver(()=>{ clearTimeout(rt); rt = setTimeout(relayout, 60); });
+  ro.observe(els.stage);
+}
+requestAnimationFrame(relayout);
+window.addEventListener('load', relayout);
+
+prepare();
+fit();
+drawMap();
+syncGroupToggle();
+buildList();
+paintStats();
+</script>
+</body>
+</html>
