@@ -26,9 +26,11 @@ python3 -m http.server 8000
 - **Search** the list by name.
 - **Name your log** with a nickname — `Abi's` titles it *Abi's PH travel log*,
   on the page, in the browser tab, and on the exported image.
+- **Add a photo** to any stamped province — tap it a second time to open it. One
+  photo each, picked from this device, kept in this browser and never uploaded.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
-- **Save and load a file** — JSON, the way to carry a log to another device.
-- **Clear** the log.
+- **Save and load a file** — JSON, or a ZIP when there are photos to carry.
+- **Clear** the log, asking about stamps and photos separately.
 
 ## Files
 
@@ -48,6 +50,11 @@ Everything is in `localStorage`, under these keys:
 | `ph82.nickname.v1`   | The log's nickname                      |
 | `ph82.groupby.v1`    | Island or region grouping               |
 
+Photos live separately, in an IndexedDB database called `ph82-photos` — one
+record per province holding a display copy and a thumbnail. The app asks for
+persistent storage the first time a photo is added, but a browser short of room
+can still discard them, so the export is the only real backup.
+
 Browser storage is per-origin, so a log does not follow the page from `file://`
 to a web address, or between domains. Use **Save file** to move one.
 
@@ -66,6 +73,23 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.1.0 — 2026-08-30
+
+- Added: one photo per province, held on the device in IndexedDB and never
+  uploaded. Tap a stamped province to open it, add, replace or remove the photo,
+  or take the stamp off. Provinces holding a photo carry a dot in the list and a
+  tag in the map readout.
+- Added: photos are downscaled on the way in (1600px display copy, 320px
+  thumbnail) by re-encoding through a canvas, which also strips EXIF — so
+  location and camera data never reach an exported file.
+- Changed: **Save file** writes a ZIP (`log.json` plus `images/`) when there are
+  photos, and a plain `.json` when there are none. **Load file** reads both; a ZIP
+  replaces the photos, a bare `.json` leaves them alone.
+- Changed: tapping a stamped province on the map now opens it instead of
+  un-stamping. Un-stamping moved into that sheet, and the list rows still toggle.
+- Changed: **Clear** is an in-page dialog that asks about stamps and photos
+  separately, rather than a browser confirm.
 
 ### 1.0.1 — 2026-08-30
 
