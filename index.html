@@ -10,6 +10,7 @@
     --paper:#F2EFE7; --panel:#FBFAF6; --ink:#1B1D1A; --ink-2:#6E7169;
     --rule:#DAD6CA; --rule-2:#E9E5DB;
     --visited:#1B6B57; --clay:#B0674A; --unvisited:#E4E0D5;
+    --planned:#E4A97D; --planned-line:#C2814F;
     --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
     --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
@@ -87,6 +88,7 @@
   #svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
   .prov{transition:fill .4s ease;stroke:#C7C2B4;stroke-width:.7px;vector-effect:non-scaling-stroke}
   .prov.on{fill:var(--visited)}
+  .prov.plan{fill:var(--planned)}   /* dated ahead, not stamped yet */
   .prov.off{fill:var(--unvisited)}
   .prov.hot{stroke:var(--ink);stroke-width:1.4px}
   .burst{fill:none;stroke:var(--visited);vector-effect:non-scaling-stroke}
@@ -161,6 +163,24 @@
     font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
   }
   .callout .meta .st{font-size:12px;color:var(--ink-2)}
+
+  /* the trip: a date, and whether it has happened yet */
+  .callout .trip{display:flex;flex-direction:column;gap:9px}
+  .trip .fld{display:flex;align-items:center;gap:11px}
+  .trip .fld > span{
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;flex:none;
+  }
+  .trip .date{
+    flex:1;min-width:0;font:500 13px/1 var(--sans);color:var(--ink);
+    background:transparent;border:1px solid var(--rule);border-radius:2px;
+    padding:9px 10px;min-height:36px;
+  }
+  .trip .date:hover{border-color:var(--clay)}
+  .trip .date:focus{outline:none;border-color:var(--clay)}
+  .trip .seg{margin-left:0}
+  .trip .seg button{flex:1}
+  .trip .seg[data-set="0"] button[aria-pressed="true"]{background:var(--rule-2);color:var(--ink-2)}
+  .trip .note{font-size:11.5px;color:var(--ink-2);line-height:1.45}
   .callout .acts{padding:12px 16px}
   .callout .empty{padding:26px 18px;font-size:12.5px}
   .empty{
@@ -178,6 +198,10 @@
     min-height:38px;display:inline-flex;align-items:center;
   }
   .filelabel:hover{color:var(--clay);border-color:var(--clay)}
+  .filelabel[hidden]{display:none}
+  .trip[hidden]{display:none}
+  .acts .go{border-color:var(--ink);color:var(--ink)}
+  .acts .go:hover{background:var(--ink);color:var(--panel);border-color:var(--ink)}
   .filelabel input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
   .busy{font-size:12px;color:var(--ink-2)}
 
@@ -188,6 +212,7 @@
     border-bottom:1px solid var(--rule-2);
   }
   .opt:last-child{border-bottom:0}
+  .opt[hidden]{display:none}
   .opt input{margin:2px 0 0;width:15px;height:15px;accent-color:var(--visited);flex:none}
   .opt .t{font-size:13.5px;line-height:1.4}
   .opt .t small{display:block;margin-top:3px;font-size:11.5px;color:var(--ink-2)}
@@ -208,6 +233,15 @@
   .isl .ct{font-size:11.5px;color:var(--ink-2)}
   .isl .bar{grid-column:1/-1;height:2px;background:var(--rule-2);position:relative}
   .isl .bar i{position:absolute;inset:0 auto 0 0;background:var(--ink);transition:width .5s ease}
+
+  .planrow{
+    display:flex;gap:11px;align-items:flex-start;cursor:pointer;
+    padding:14px 24px;border-bottom:1px solid var(--rule);
+  }
+  .planrow input{margin:1px 0 0;width:15px;height:15px;accent-color:var(--planned);flex:none}
+  .planrow .t{font-size:12.5px;line-height:1.4}
+  .planrow .t small{display:block;margin-top:3px;font-size:11px;color:var(--ink-2)}
+  .planrow:hover .t{color:var(--clay)}
 
   .listhead{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
   .listhead input{
@@ -240,6 +274,7 @@
   .row[data-on="1"] .tick{background:var(--visited);border-color:var(--visited)}
   .row[data-on="1"] .tick::after{content:"";position:absolute;left:3.5px;top:7px;width:5px;height:2px;background:#fff;transform:rotate(45deg)}
   .row[data-on="1"] .tick::before{content:"";position:absolute;left:6.5px;top:4px;width:2px;height:8px;background:#fff;transform:rotate(45deg)}
+  .row[data-plan="1"] .tick{background:var(--planned);border-color:var(--planned-line)}
   .row .nm{font-size:14px}
   .row[data-on="1"] .nm{color:var(--ink-2)}
   .row .rg{font-size:10.5px;color:#A9A79D}
@@ -276,6 +311,7 @@
     .meter{grid-column:2;margin-top:8px;align-self:start}
     .nickrow{grid-column:1/-1;margin-top:8px}
     .islands{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .planrow{padding:13px 18px}
     .listhead{padding:10px 18px}
     .seg button{padding:10px 9px}
     .grp{padding:14px 18px 5px}
@@ -311,7 +347,7 @@
           <button id="z-out" aria-label="Zoom out">&minus;</button>
           <button id="z-reset" class="wide" aria-label="Reset view">FIT</button>
         </div>
-        <div class="hint">Tap a province to stamp it, tap a stamped one to open it. Pinch or scroll to zoom, drag to pan.</div>
+        <div class="hint">Tap a province to open it, then date the trip or stamp it from the panel. Pinch or scroll to zoom, drag to pan.</div>
       </div>
 
       <svg class="lead" id="lead" aria-hidden="true" hidden>
@@ -325,9 +361,19 @@
         </header>
         <div class="pbody">
           <div class="meta"><span class="rg" id="prov-rg"></span><span class="st" id="prov-st"></span></div>
+          <div class="trip" id="prov-trip">
+            <label class="fld" for="prov-date"><span>Date</span>
+              <input type="date" id="prov-date" class="date"></label>
+            <div class="seg" id="prov-kind" data-set="0" role="group" aria-label="What this date is">
+              <button type="button" data-kind="traveled" aria-pressed="true">Traveled</button>
+              <button type="button" data-kind="planned" aria-pressed="false">Planned</button>
+            </div>
+            <div class="note" id="prov-kind-note"></div>
+          </div>
           <div id="prov-slot"></div>
         </div>
         <div class="acts">
+          <button class="ghost go" id="prov-stamp">Stamp this province</button>
           <label class="filelabel" id="prov-add">Add photo
             <input type="file" id="prov-file" accept="image/*"></label>
           <button class="ghost danger" id="prov-rmphoto" hidden>Remove photo</button>
@@ -347,6 +393,10 @@
             placeholder="Abi&rsquo;s"></label>
       </div>
       <div class="islands" id="islands"></div>
+      <label class="planrow" for="showplan">
+        <input type="checkbox" id="showplan" checked>
+        <span class="t">Show planned provinces<small id="planned-n"></small></span>
+      </label>
       <div class="listhead">
         <input id="q" type="search" placeholder="Find a province" autocomplete="off" autocapitalize="none">
         <span class="n mono" id="qn"></span>
@@ -370,6 +420,8 @@
     <div class="opts">
       <label class="opt"><input type="checkbox" id="clear-stamps" checked>
         <span class="t">Stamped provinces<small id="clear-stamps-n"></small></span></label>
+      <label class="opt" id="clear-dates-row"><input type="checkbox" id="clear-dates">
+        <span class="t">Dates<small id="clear-dates-n"></small></span></label>
       <label class="opt" id="clear-photos-row"><input type="checkbox" id="clear-photos">
         <span class="t">Photos<small id="clear-photos-n"></small></span></label>
     </div>
@@ -389,8 +441,9 @@
     </header>
     <dl>
       <dt>How to use</dt>
-      <dd><b>Stamp a province</b> by tapping it on the map, or by tapping its row in the list.
-        Tap it again to take the stamp off.
+      <dd><b>Stamp a province</b> by tapping it on the map to open its panel, then
+        <b>Stamp this province</b>. Tapping its row in the list stamps it straight away, and
+        tapping that row again takes the stamp off.
         <small>Stamped provinces turn green on the map and show a tick in the list. The count,
         the percentage and the island bars all follow along.</small></dd>
       <dd><b>Move the map</b> by dragging to pan, and scrolling or pinching to zoom.
@@ -404,14 +457,25 @@
       <dd><b>Work the list</b> by typing part of a name in <b>Find a province</b> to narrow it,
         and switching between <b>Island</b> and <b>Region</b> to group it by island group
         or by administrative region.</dd>
-      <dd><b>Add a photo</b> by tapping a province you have already stamped. One photo each,
+      <dd><b>Date the trip</b> in the panel that opens when you tap any province, stamped or not.
+        Pick a day in <b>Date</b>, then say whether it is a day you have <b>Planned</b> or the day you
+        <b>Traveled</b>. A province you have not stamped starts on <b>Planned</b>, so a trip can be laid
+        out before you go.
+        <small>A province you have planned but not yet stamped is drawn in clay on the map, so a
+        trip you have laid out reads at a glance against the green of the ones behind you. Stamp it
+        and it turns green. Untick <b>Show planned provinces</b> in the panel to leave the plans out
+        of the map, the list and the saved image &mdash; the dates themselves stay where they are. The date is yours to set and is separate from the stamp date, which is
+        simply the day the stamp went on. It is saved with the log and comes back when you load one.
+        Taking the stamp off leaves the date alone &mdash; empty the field to clear it.</small></dd>
+      <dd><b>Add a photo</b> from the panel of a province you have already stamped &mdash; the photo is
+        the one thing that waits for the stamp. One photo each,
         picked from this device. Provinces holding a photo carry a small dot in the list.
         <small>Photos are kept in this browser and are never uploaded. They are shrunk on the way
         in, which also strips the location and camera data your phone attaches to a picture.</small></dd>
       <dd><b>Keep a copy</b> with the buttons at the top. <b>Save file</b> writes your log out as a
         JSON file, or a ZIP holding your photos alongside it, and <b>Load file</b> reads either
         back in. <b>Save image</b> draws your map as a PNG to keep or post. <b>Clear</b> empties the
-        log, asking about stamps and photos separately.
+        log, asking about stamps, dates and photos separately.
         <small>Loading a file replaces whatever is currently stamped in this browser, so save a
         copy first if you want to keep it. The saved file is also how you carry your log to
         another device.</small></dd>
@@ -460,15 +524,18 @@
 <script>
 const SAVE_KEY = "ph82.visited.v1";
 const NICK_KEY = "ph82.nickname.v1";
-const APP_VERSION = "1.1.0";
+const TRIP_KEY = "ph82.trips.v1";
+const APP_VERSION = "1.2.0";
 const APP_NAME = "Eighty\u2011Two";
 const APP_TITLE = "Eighty-Two \u2014 Philippine Province Log";
 const UNDATED = "undated";
+const KINDS = ["traveled","planned"];
 const NS = "http://www.w3.org/2000/svg";
 const AB = window.PH82_ALPHABET;
 const IDX = {}; for(let i=0;i<AB.length;i++) IDX[AB[i]] = i;
 
 const GROUP_KEY = "ph82.groupby.v1";
+const PLAN_KEY = "ph82.showplanned.v1";
 const ISLANDS = ["Luzon","Visayas","Mindanao"];
 
 const els = {
@@ -478,11 +545,14 @@ const els = {
   meter:document.getElementById('meter'), islands:document.getElementById('islands'),
   list:document.getElementById('list'), q:document.getElementById('q'), qn:document.getElementById('qn'),
   groupby:document.getElementById('groupby'), nick:document.getElementById('nick'),
+  showplan:document.getElementById('showplan'), plannedN:document.getElementById('planned-n'),
   h1:document.querySelector('.wordmark h1')
 };
 
 let visited = loadSave();
+let trips = loadTrips();
 let groupBy = loadGroupBy();
+let showPlanned = loadShowPlanned();
 let nickname = loadNick();
 let provinces = [];
 let gRoot, gStamp, hot = null;
@@ -491,6 +561,43 @@ let view = {k:1, x:0, y:0}, base = null;
 function loadSave(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; }catch(e){ return {}; } }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(visited)); }catch(e){} }
 function stampLabel(v){ return v && v !== UNDATED ? "stamped " + v : "stamped"; }
+
+/* A trip is the province's own date — when it was traveled, or when it is planned
+   for — kept apart from the stamp date, which is simply when the stamp went on. */
+function loadTrips(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(TRIP_KEY)) || {};
+    const out = {};
+    for(const id in raw){
+      const t = cleanTrip(raw[id]);
+      if(t) out[String(id)] = t;
+    }
+    return out;
+  }catch(e){ return {}; }
+}
+function saveTrips(){ try{ localStorage.setItem(TRIP_KEY, JSON.stringify(trips)); }catch(e){} }
+function cleanTrip(t){
+  if(!t || typeof t !== "object") return null;
+  const date = String(t.date || "");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  return {date:date, kind:KINDS.indexOf(t.kind) < 0 ? "traveled" : t.kind};
+}
+function setTrip(id, date, kind){
+  const t = cleanTrip({date:date, kind:kind});
+  if(t) trips[String(id)] = t; else delete trips[String(id)];
+  saveTrips();
+  return t;
+}
+function tripLabel(t){ return t ? (t.kind === "planned" ? "planned for " : "traveled ") + t.date : ""; }
+/* A province is shown as planned while the trip is still ahead of the stamp —
+   once it is stamped the stamp is the truer thing to say, so green wins. */
+function isPlanned(id){
+  const t = trips[String(id)];
+  return !!t && t.kind === "planned" && !visited[id];
+}
+/* The sidebar switch decides only whether a plan is drawn — on the map, in the
+   list and on the saved image. The date itself is left alone either way. */
+function showsPlan(id){ return showPlanned && isPlanned(id); }
 function loadNick(){
   try{ return (localStorage.getItem(NICK_KEY) || "").slice(0,24); }catch(e){ return ""; }
 }
@@ -507,6 +614,13 @@ function applyNick(){
 }
 function loadGroupBy(){
   try{ return localStorage.getItem(GROUP_KEY) === "region" ? "region" : "island"; }catch(e){ return "island"; }
+}
+function loadShowPlanned(){
+  try{ return localStorage.getItem(PLAN_KEY) !== "0"; }catch(e){ return true; }
+}
+function setShowPlanned(on){
+  showPlanned = !!on;
+  try{ localStorage.setItem(PLAN_KEY, showPlanned ? "1" : "0"); }catch(e){}
 }
 
 /* ── geometry ── */
@@ -558,6 +672,14 @@ function fit(){
   });
 }
 
+function paintProv(p){
+  const on = !!visited[p.id], plan = !on && showsPlan(p.id);
+  p.el.classList.toggle('on', on);
+  p.el.classList.toggle('plan', plan);
+  p.el.classList.toggle('off', !on && !plan);
+  const row = els.list.querySelector('.row[data-id="'+p.id+'"]');
+  if(row){ row.dataset.on = on ? "1" : "0"; row.dataset.plan = plan ? "1" : "0"; }
+}
 function drawMap(){
   els.svg.textContent = "";
   gRoot = document.createElementNS(NS,"g");
@@ -565,9 +687,10 @@ function drawMap(){
   provinces.forEach(p=>{
     const el = document.createElementNS(NS,"path");
     el.setAttribute("d", p.d);
-    el.setAttribute("class", "prov " + (visited[p.id] ? "on" : "off"));
     el.setAttribute("data-id", p.id);
     p.el = el;
+    el.setAttribute("class", "prov");
+    paintProv(p);   /* the list is not built yet; paintProv skips the row it cannot find */
     gRoot.appendChild(el);
   });
   gStamp = document.createElementNS(NS,"g");
@@ -597,7 +720,10 @@ function setHot(p){
   els.readout.textContent = "";
   const b = document.createElement('span'); b.textContent = p.name;
   const e = document.createElement('em');
-  e.textContent = visited[p.id] ? stampLabel(visited[p.id]) : p.region;
+  const trip = trips[String(p.id)];
+  e.textContent = visited[p.id] ? stampLabel(visited[p.id])
+                : showsPlan(p.id) ? tripLabel(trip)
+                : p.region;
   els.readout.append(b, e);
   if(photoIds.has(String(p.id))){
     const i = document.createElement('i'); i.textContent = "photo";
@@ -608,13 +734,13 @@ function setHot(p){
 function mark(id, on){
   const p = provinces.find(x=>x.id===id); if(!p) return;
   if(on === !!visited[id]) return;
-  if(on) visited[id] = new Date().toISOString().slice(0,10); else delete visited[id];
+  if(on) visited[id] = new Date().toISOString().slice(0,10);
+  else delete visited[id];   /* the date outlives the stamp — it may be a plan */
   save();
-  p.el.classList.toggle('on', on); p.el.classList.toggle('off', !on);
+  paintProv(p);
   if(on) burst(p);
-  const row = els.list.querySelector('.row[data-id="'+id+'"]');
-  if(row) row.dataset.on = on ? "1" : "0";
   if(hot === p){ hot = null; setHot(p); }
+  if(sheetProv === p) repaintProv();
   paintStats();
 }
 function burst(p){
@@ -691,7 +817,7 @@ els.svg.addEventListener('click', e=>{
   if(dragged || performance.now()-downT > 700) return;
   const p = provAt(e.clientX, e.clientY); if(!p) return;
   setHot(p);
-  if(visited[p.id]) openProv(p); else mark(p.id, true);
+  openProv(p);
 });
 els.svg.addEventListener('wheel', e=>{
   e.preventDefault();
@@ -733,6 +859,7 @@ function buildList(){
       const b = document.createElement('button');
       b.className="row"; b.dataset.id=p.id; b.dataset.grp=gk;
       b.dataset.on = visited[p.id] ? "1":"0";
+      b.dataset.plan = showsPlan(p.id) ? "1":"0";
       b.dataset.photo = photoIds.has(String(p.id)) ? "1":"0";
       b.dataset.name = p.name.toLowerCase();
       b.innerHTML = '<span class="tick"></span><span class="nm"></span><span class="rg"></span>';
@@ -782,6 +909,7 @@ function filterList(){
 }
 
 function paintStats(){
+  paintPlanRow();
   const total = provinces.length || 82;
   const n = provinces.filter(p=>visited[p.id]).length;
   els.count.textContent = String(n);
@@ -800,6 +928,21 @@ function paintStats(){
   });
 }
 
+/* the switch reads the plans that exist, whether or not they are being drawn */
+function paintPlanRow(){
+  const np = provinces.filter(p=>isPlanned(p.id)).length;
+  els.plannedN.textContent = np
+    ? np + (np === 1 ? " province dated ahead" : " provinces dated ahead")
+    : "None dated ahead yet";
+}
+els.showplan.checked = showPlanned;
+els.showplan.addEventListener('change', ()=>{
+  setShowPlanned(els.showplan.checked);
+  provinces.forEach(paintProv);
+  if(hot){ const p = hot; hot = null; setHot(p); }
+  paintStats();
+});
+
 let toastT;
 function toast(msg){
   const t = document.getElementById('toast');
@@ -807,19 +950,17 @@ function toast(msg){
   clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('up'), 2600);
 }
 function repaintAll(){
-  provinces.forEach(p=>{
-    p.el.classList.toggle('on', !!visited[p.id]);
-    p.el.classList.toggle('off', !visited[p.id]);
-  });
+  provinces.forEach(paintProv);
   els.list.querySelectorAll('.row').forEach(r=>{
-    r.dataset.on = visited[r.dataset.id] ? "1" : "0";
     r.dataset.photo = photoIds.has(r.dataset.id) ? "1" : "0";
   });
   setHot(null); paintStats();
+  if(sheetProv) repaintProv();
 }
 
 /* ── save as image: lay the map out afresh at poster size, then rasterise ── */
 const PAPER="#F2EFE7", INK="#1B1D1A", INK2="#6E7169", RULE="#DAD6CA";
+const PLANNED="#E4A97D", PLANNED_INK="#C2814F";
 const SANS="'Helvetica Neue',Helvetica,Arial,sans-serif";
 const SERIF="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif";
 
@@ -834,7 +975,8 @@ function mk(tag, attrs, text){
   return e;
 }
 function poster(){
-  const PAD = 84, MAP_H = 1240, HEAD = 172, FOOT = 232;
+  const np = provinces.filter(p=>showsPlan(p.id)).length;
+  const PAD = 84, MAP_H = 1240, HEAD = 172, FOOT = np ? 272 : 232;
   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
   provinces.forEach(p=>p.rings.forEach(r=>r.forEach(c=>{
     if(c[0]<x0)x0=c[0]; if(c[0]>x1)x1=c[0]; if(c[1]<y0)y0=c[1]; if(c[1]>y1)y1=c[1];
@@ -861,7 +1003,8 @@ function poster(){
       r.forEach((c,i)=>{ d += (i?"L":"") + (c[0]*s + tx).toFixed(1) + " " + (ty - c[1]*s).toFixed(1); });
       d += "Z";
     });
-    svg.appendChild(mk("path",{d:d, fill:visited[p.id] ? "#1B6B57" : "#E4E0D5",
+    svg.appendChild(mk("path",{d:d,
+      fill:visited[p.id] ? "#1B6B57" : showsPlan(p.id) ? PLANNED : "#E4E0D5",
       stroke:"#C7C2B4","stroke-width":0.8}));
   });
 
@@ -879,7 +1022,12 @@ function poster(){
   });
   svg.appendChild(mk("text",{x:mid,y:fy+76,"text-anchor":"middle","font-family":SANS,
     "font-size":12.5,"letter-spacing":1.8,fill:INK2}, parts.join("  \u00B7  ")));
-  svg.appendChild(mk("text",{x:mid,y:fy+118,"text-anchor":"middle","font-family":SANS,
+  if(np){
+    svg.appendChild(mk("text",{x:mid,y:fy+114,"text-anchor":"middle","font-family":SANS,
+      "font-size":12.5,"letter-spacing":1.8,fill:PLANNED_INK},
+      (np === 1 ? "1 PROVINCE PLANNED" : np + " PROVINCES PLANNED")));
+  }
+  svg.appendChild(mk("text",{x:mid,y:fy+(np?156:118),"text-anchor":"middle","font-family":SANS,
     "font-size":11.5,"letter-spacing":1.6,fill:"#A9A79D"},
     new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"}).toUpperCase()));
 
@@ -1019,12 +1167,28 @@ function drawLead(){
 }
 function dropSheetURL(){ if(sheetURL){ URL.revokeObjectURL(sheetURL); sheetURL = null; } }
 
+/* The date is open the moment a province is tapped, so a trip can be planned long
+   before it is visited. The photo is what belongs to a stamp, so it waits for one. */
+function paintProvState(){
+  const on = !!(sheetProv && visited[sheetProv.id]);
+  document.getElementById('prov-st').textContent =
+    on ? stampLabel(visited[sheetProv.id]) : "not stamped";
+  document.getElementById('prov-stamp').hidden = on;
+  document.getElementById('prov-add').hidden = !on;
+  document.getElementById('prov-unstamp').hidden = !on;
+}
+async function repaintProv(){
+  paintProvState();
+  paintTrip();
+  await paintSheetPhoto();
+}
+
 async function openProv(p){
   sheetProv = p;
   document.getElementById('prov-h').textContent = p.name;
   document.getElementById('prov-rg').textContent = p.region;
-  document.getElementById('prov-st').textContent = visited[p.id] ? stampLabel(visited[p.id]) : "not stamped";
-  document.getElementById('prov-unstamp').hidden = !visited[p.id];
+  paintProvState();
+  paintTrip();
   provBox.hidden = false;
   drawLead();
   await paintSheetPhoto();
@@ -1048,12 +1212,64 @@ async function paintSheetPhoto(){
   } else {
     const d = document.createElement('div');
     d.className = "empty";
-    d.textContent = "No photo yet. Anything you add stays on this device and is never uploaded.";
+    d.textContent = sheetProv && visited[sheetProv.id]
+      ? "No photo yet. Anything you add stays on this device and is never uploaded."
+      : "Not stamped yet. Set a date above whenever you like — a photo waits for the stamp.";
     slot.appendChild(d);
     rm.hidden = true; addLabel.nodeValue = "Add photo";
   }
   drawLead();
 }
+
+/* the date field and the traveled / planned toggle */
+const tripDate = document.getElementById('prov-date');
+const tripKind = document.getElementById('prov-kind');
+const tripNote = document.getElementById('prov-kind-note');
+
+function defaultKind(){
+  return sheetProv && visited[sheetProv.id] ? "traveled" : "planned";
+}
+function paintTrip(){
+  const t = sheetProv ? trips[String(sheetProv.id)] : null;
+  tripDate.value = t ? t.date : "";
+  const kind = t ? t.kind : defaultKind();
+  tripKind.dataset.set = t ? "1" : "0";
+  tripKind.querySelectorAll('button').forEach(b=>{
+    b.setAttribute("aria-pressed", b.dataset.kind === kind ? "true" : "false");
+  });
+  tripNote.textContent = t ? tripLabel(t)
+    : (defaultKind() === "planned"
+        ? "Pick the day you plan to go. Stamp the province when you get there."
+        : "Pick the day you traveled, or a day you plan to go back.");
+}
+function writeTrip(date, kind){
+  if(!sheetProv) return;
+  const p = sheetProv;
+  const t = setTrip(p.id, date, kind);
+  paintProv(p);   /* a planned date colours the province in */
+  paintTrip();
+  paintPlanRow();
+  toast(t ? p.name + " " + tripLabel(t) : "Date cleared for " + p.name);
+}
+tripDate.onchange = ()=>{
+  const cur = sheetProv ? trips[String(sheetProv.id)] : null;
+  writeTrip(tripDate.value, cur ? cur.kind : defaultKind());
+};
+tripKind.onclick = e=>{
+  const b = e.target.closest('button'); if(!b || !sheetProv) return;
+  /* the toggle needs a date to describe, so ask for one first */
+  if(!tripDate.value){
+    tripKind.querySelectorAll('button').forEach(x=>{
+      x.setAttribute("aria-pressed", x === b ? "true" : "false");
+    });
+    tripNote.textContent = "Pick a date first — then it is saved as " + b.dataset.kind + ".";
+    if(tripDate.showPicker) { try{ tripDate.showPicker(); }catch(err){ tripDate.focus(); } }
+    else tripDate.focus();
+    return;
+  }
+  writeTrip(tripDate.value, b.dataset.kind);
+};
+
 function closeProv(){
   provBox.hidden = true; showLead(false);
   dropSheetURL(); sheetProv = null;
@@ -1093,10 +1309,12 @@ document.getElementById('prov-rmphoto').onclick = async ()=>{
     toast("Photo removed");
   }catch(e){ toast("The photo could not be removed"); }
 };
+/* mark() repaints the panel of the province it touches, so these only ask for the mark */
+document.getElementById('prov-stamp').onclick = ()=>{
+  if(sheetProv) mark(sheetProv.id, true);
+};
 document.getElementById('prov-unstamp').onclick = ()=>{
-  if(!sheetProv) return;
-  mark(sheetProv.id, false);
-  closeProv();
+  if(sheetProv) mark(sheetProv.id, false);
 };
 
 /* ── zip: store-only writer, stored + deflate reader ── */
@@ -1177,19 +1395,28 @@ function download(blob, name){
 
 /* A log with no photos stays a plain .json file; photos make it a .zip. */
 document.getElementById('export').onclick = async ()=>{
-  const rows = provinces.filter(p=>visited[p.id]).map(p=>({
-    id:p.id, name:p.name, region:p.region, island:p.island, date:visited[p.id]
-  }));
+  /* every stamped province, and every province merely carrying a date; a row with no
+     stamp is marked as such so that loading it back does not stamp it */
+  const rows = provinces.filter(p=> visited[p.id] || trips[String(p.id)]).map(p=>{
+    const r = {id:p.id, name:p.name, region:p.region, island:p.island};
+    if(visited[p.id]) r.date = visited[p.id]; else r.stamped = false;
+    const t = trips[String(p.id)];
+    if(t){ r.tripDate = t.date; r.tripKind = t.kind; }
+    return r;
+  });
+  const stamped = provinces.filter(p=>visited[p.id]).length;
+  const dated = rows.length - stamped;
+  const tally = stamped + " provinces" + (dated ? " and " + dated + " dated" : "");
   const meta = {
     app:"eighty-two", version:1, appVersion:APP_VERSION, exported:new Date().toISOString(),
-    nickname:nickname, count:rows.length, total:provinces.length,
+    nickname:nickname, count:stamped, total:provinces.length,
     photos:photoIds.size, provinces:rows
   };
   const stamp = new Date().toISOString().slice(0,10);
   const text = JSON.stringify(meta, null, 2);
   if(!photoIds.size){
     download(new Blob([text], {type:"application/json"}), slugName()+"-log-"+stamp+".json");
-    toast("Saved "+rows.length+" provinces to a file");
+    toast("Saved "+tally+" to a file");
     return;
   }
   toast("Packing photos…");
@@ -1201,7 +1428,7 @@ document.getElementById('export').onclick = async ()=>{
       files.push({name:"images/"+r.id+".jpg", data:new Uint8Array(await r.full.arrayBuffer())});
     }
     download(zipWrite(files), slugName()+"-log-"+stamp+".zip");
-    toast("Saved "+rows.length+" provinces and "+(files.length-1)+" photos");
+    toast("Saved "+tally+" and "+(files.length-1)+" photos");
   }catch(e){ toast("The file could not be written"); }
 };
 document.getElementById('import').onclick = ()=> document.getElementById('file').click();
@@ -1209,12 +1436,16 @@ function applyLog(j){
   const list = Array.isArray(j) ? j : j.provinces;
   if(!Array.isArray(list)) throw new Error("no province list");
   const known = new Set(provinces.map(p=>p.id));
-  const next = {}; let skipped = 0;
+  const next = {}, nextTrips = {}; let skipped = 0;
   list.forEach(p=>{
     const id = String(p.id || "");
-    if(known.has(id)) next[id] = p.date || UNDATED; else skipped++;
+    if(!known.has(id)){ skipped++; return; }
+    if(p.stamped !== false) next[id] = p.date || UNDATED;  /* older files stamp every row */
+    const t = cleanTrip({date:p.tripDate, kind:p.tripKind});
+    if(t) nextTrips[id] = t;
   });
   visited = next; save();
+  trips = nextTrips; saveTrips();
   if(j && typeof j.nickname === "string"){ setNick(j.nickname); els.nick.value = nickname; }
   return {loaded:Object.keys(next).length, skipped};
 }
@@ -1265,12 +1496,16 @@ document.getElementById('file').onchange = async e=>{
    destroy pictures. An in-page dialog, since confirm() is suppressed in some frames. */
 const clearBox = document.getElementById('clearbox');
 function openClear(){
-  const ns = Object.keys(visited).length, np = photoIds.size;
-  if(!ns && !np){ toast("Nothing to clear"); return; }
+  const ns = Object.keys(visited).length, nd = Object.keys(trips).length, np = photoIds.size;
+  if(!ns && !nd && !np){ toast("Nothing to clear"); return; }
   const sc = document.getElementById('clear-stamps'), pc = document.getElementById('clear-photos');
-  sc.checked = ns > 0; sc.disabled = !ns; pc.checked = false;
+  const dc = document.getElementById('clear-dates');
+  sc.checked = ns > 0; sc.disabled = !ns; dc.checked = false; pc.checked = false;
   document.getElementById('clear-stamps-n').textContent =
     ns ? ns + (ns === 1 ? " province stamped" : " provinces stamped") : "none stamped";
+  document.getElementById('clear-dates-n').textContent =
+    nd + (nd === 1 ? " province dated" : " provinces dated");
+  document.getElementById('clear-dates-row').hidden = !nd;
   document.getElementById('clear-photos-n').textContent =
     np + (np === 1 ? " photo on this device" : " photos on this device");
   document.getElementById('clear-photos-row').hidden = !np;
@@ -1285,16 +1520,20 @@ clearBox.onclick = e=>{ if(e.target === clearBox) closeClear(); };
 document.getElementById('clear-go').onclick = async ()=>{
   const sc = document.getElementById('clear-stamps');
   const doS = sc.checked && !sc.disabled;
+  const doD = document.getElementById('clear-dates').checked && Object.keys(trips).length > 0;
   const doP = document.getElementById('clear-photos').checked && photoIds.size > 0;
   closeClear();
-  if(!doS && !doP) return;
+  if(!doS && !doD && !doP) return;
   if(doS){ visited = {}; save(); }
+  if(doD){ trips = {}; saveTrips(); }
   if(doP){
     try{ await photoClear(); photoIds = new Set(); }
     catch(e){ toast("The photos could not be deleted"); return; }
   }
   repaintAll();
-  toast(doS && doP ? "Stamps and photos cleared" : doS ? "Stamps cleared" : "Photos deleted");
+  const done = [doS && "stamps", doD && "dates", doP && "photos"].filter(Boolean)
+    .join(", ").replace(/, ([^,]*)$/, " and $1");
+  toast(done.charAt(0).toUpperCase() + done.slice(1) + " cleared");
 };
 
 const aboutBox = document.getElementById('aboutbox');

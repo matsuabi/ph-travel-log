@@ -19,18 +19,21 @@ python3 -m http.server 8000
 
 ## What it does
 
-- **Stamp provinces** by clicking the map or the list; click again to un-stamp.
+- **Stamp provinces** from the list with a click, or by tapping one on the map to
+  open its panel and stamping it there.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
 - **Search** the list by name.
 - **Name your log** with a nickname — `Abi's` titles it *Abi's PH travel log*,
   on the page, in the browser tab, and on the exported image.
-- **Add a photo** to any stamped province — tap it a second time to open it. One
-  photo each, picked from this device, kept in this browser and never uploaded.
+- **Date a trip** on any province, stamped or not — a day you *traveled*, or a day
+  you have *planned*. Planned provinces are drawn in clay, and can be hidden.
+- **Add a photo** to any stamped province — open it and add one. One photo each,
+  picked from this device, kept in this browser and never uploaded.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
 - **Save and load a file** — JSON, or a ZIP when there are photos to carry.
-- **Clear** the log, asking about stamps and photos separately.
+- **Clear** the log, asking about stamps, dates and photos separately.
 
 ## Files
 
@@ -49,6 +52,8 @@ Everything is in `localStorage`, under these keys:
 | `ph82.visited.v1`    | Stamped provinces, keyed by PSGC code   |
 | `ph82.nickname.v1`   | The log's nickname                      |
 | `ph82.groupby.v1`    | Island or region grouping               |
+| `ph82.trips.v1`      | Trip dates, each with `date` and `kind` |
+| `ph82.showplanned.v1`| Whether planned provinces are drawn     |
 
 Photos live separately, in an IndexedDB database called `ph82-photos` — one
 record per province holding a display copy and a thumbnail. The app asks for
@@ -73,6 +78,31 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.2.0 — 2026-09-05
+
+- Added: a date for every province, stamped or not, kept in `ph82.trips.v1` apart
+  from the stamp date — which stays what it has always been, the day the stamp
+  went on. Each date is either **Traveled** or **Planned**; an unstamped province
+  starts on **Planned**, so a trip can be laid out before you go. Taking a stamp
+  off leaves the date alone; emptying the field clears it.
+- Added: a province dated ahead but not yet stamped is drawn in clay on the map,
+  ticked in clay in the list, and named in the map readout. Stamping it turns it
+  green — the stamp is the truer thing to say, so it wins.
+- Added: **Show planned provinces** in the sidebar, counting what is dated ahead
+  and deciding whether plans are drawn at all — on the map, in the list and on the
+  saved image. The dates themselves are untouched either way, and the switch is
+  remembered in `ph82.showplanned.v1`.
+- Added: the saved poster carries a planned count under the island breakdown when
+  plans are being shown.
+- Changed: tapping any province on the map now opens its panel — an unstamped one
+  no longer stamps on contact. **Stamp this province** sits in the panel, and
+  un-stamping now leaves the panel open. List rows still toggle on a click.
+- Changed: saved files carry `tripDate` and `tripKind`, and now include provinces
+  that hold only a date, marked `stamped: false`. The file format stays at
+  `version: 1` — older files have no such rows, so every row in one still stamps.
+  `count` is the number stamped, as before.
+- Changed: **Clear** asks about stamps, dates and photos separately.
 
 ### 1.1.0 — 2026-08-30
 
