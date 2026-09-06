@@ -1,4 +1,4 @@
-# Eighty-Two
+# StampLogs
 
 A map of the Philippines you stamp as you travel it. Tap a province, it fills in;
 the count, the percentage and the island bars keep score. All 82 provinces of the
@@ -33,6 +33,8 @@ python3 -m http.server 8000
   picked from this device, kept in this browser and never uploaded.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
 - **Save and load a file** — JSON, or a ZIP when there are photos to carry.
+  Saved files are named `nickname-stamplogs-date`, or `stamplogs-date` when the
+  log has no nickname.
 - **Clear** the log, asking about stamps, dates and photos separately.
 
 ## Files
@@ -47,18 +49,24 @@ python3 -m http.server 8000
 
 Everything is in `localStorage`, under these keys:
 
-| Key                  | Holds                                  |
-| -------------------- | -------------------------------------- |
-| `ph82.visited.v1`    | Stamped provinces, keyed by PSGC code   |
-| `ph82.nickname.v1`   | The log's nickname                      |
-| `ph82.groupby.v1`    | Island or region grouping               |
-| `ph82.trips.v1`      | Trip dates, each with `date` and `kind` |
-| `ph82.showplanned.v1`| Whether planned provinces are drawn     |
+| Key                       | Holds                                   |
+| ------------------------- | --------------------------------------- |
+| `stamplogs.visited.v1`    | Stamped provinces, keyed by PSGC code   |
+| `stamplogs.nickname.v1`   | The log's nickname                      |
+| `stamplogs.groupby.v1`    | Island or region grouping               |
+| `stamplogs.trips.v1`      | Trip dates, each with `date` and `kind` |
+| `stamplogs.showplanned.v1`| Whether planned provinces are drawn     |
 
-Photos live separately, in an IndexedDB database called `ph82-photos` — one
-record per province holding a display copy and a thumbnail. The app asks for
-persistent storage the first time a photo is added, but a browser short of room
-can still discard them, so the export is the only real backup.
+Photos live separately, in an IndexedDB database called `stamplogs-photos` — one
+record per province holding a display copy and a thumbnail.
+
+These were named `ph82.*` and `ph82-photos` when the app was called Eighty-Two. A
+log written under the old names is copied across the first time this version runs,
+and the originals are left where they are — nothing is deleted. The one-time copy
+is recorded in `stamplogs.migrated.v1` and `stamplogs.photos.migrated.v1`.
+
+The app asks for persistent storage the first time a photo is added, but a browser
+short of room can still discard them, so the export is the only real backup.
 
 Browser storage is per-origin, so a log does not follow the page from `file://`
 to a web address, or between domains. Use **Save file** to move one.
@@ -78,6 +86,26 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.3.0 — 2026-09-06
+
+- Changed: the app is now called **StampLogs** — the page title, the wordmark, the
+  browser tab, the heading on the saved poster and the `app` field in saved files.
+  It was Eighty-Two before.
+- Changed: saved files are named `nickname-stamplogs-date`, or `stamplogs-date`
+  when the log has no nickname. The extension tells the map from the log, so the
+  `-log-` and `-map-` parts of the old names are gone.
+- Changed: local storage keys are now `stamplogs.*` and the photo database is
+  `stamplogs-photos`; they were `ph82.*` and `ph82-photos`. A log written under
+  the old names is copied across the first time this version runs, and the
+  originals are left in place, so nothing is lost and an older copy of the page
+  still opens them. The one-time copy is recorded in `stamplogs.migrated.v1` and
+  `stamplogs.photos.migrated.v1`.
+- Changed: the province data globals are `window.STAMPLOGS` and
+  `window.STAMPLOGS_ALPHABET`, formerly `window.PH82` and `window.PH82_ALPHABET`.
+
+Saved files are unaffected: the file format stays at `version: 1`, and a file
+written by an earlier release still loads.
 
 ### 1.2.0 — 2026-09-05
 

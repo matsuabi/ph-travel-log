@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FBFAF6">
-<title>Eighty-Two — Philippine Province Log</title>
+<title>StampLogs — Philippine Province Log</title>
 <style>
   :root{
     --paper:#F2EFE7; --panel:#FBFAF6; --ink:#1B1D1A; --ink-2:#6E7169;
@@ -323,7 +323,7 @@
 <div class="app">
   <header>
     <div class="wordmark">
-      <h1>Eighty&#8209;Two</h1>
+      <h1>StampLogs</h1>
       <span>Philippine province log</span>
     </div>
     <div class="spacer"></div>
@@ -453,7 +453,7 @@
         in the browser tab, and as the heading on the saved image. The nickname travels inside
         the saved file too.
         <small>It is kept in this browser like everything else. Leave it empty and the page
-        goes back to being called Eighty&#8209;Two.</small></dd>
+        goes back to being called StampLogs.</small></dd>
       <dd><b>Work the list</b> by typing part of a name in <b>Find a province</b> to narrow it,
         and switching between <b>Island</b> and <b>Region</b> to group it by island group
         or by administrative region.</dd>
@@ -522,21 +522,42 @@
 
 <script src="provinces.js"></script>
 <script>
-const SAVE_KEY = "ph82.visited.v1";
-const NICK_KEY = "ph82.nickname.v1";
-const TRIP_KEY = "ph82.trips.v1";
-const APP_VERSION = "1.2.0";
-const APP_NAME = "Eighty\u2011Two";
-const APP_TITLE = "Eighty-Two \u2014 Philippine Province Log";
+const SAVE_KEY = "stamplogs.visited.v1";
+const NICK_KEY = "stamplogs.nickname.v1";
+const TRIP_KEY = "stamplogs.trips.v1";
+const APP_VERSION = "1.3.0";
+const APP_NAME = "StampLogs";
+const APP_TITLE = "StampLogs \u2014 Philippine Province Log";
 const UNDATED = "undated";
 const KINDS = ["traveled","planned"];
 const NS = "http://www.w3.org/2000/svg";
-const AB = window.PH82_ALPHABET;
+const AB = window.STAMPLOGS_ALPHABET;
 const IDX = {}; for(let i=0;i<AB.length;i++) IDX[AB[i]] = i;
 
-const GROUP_KEY = "ph82.groupby.v1";
-const PLAN_KEY = "ph82.showplanned.v1";
+const GROUP_KEY = "stamplogs.groupby.v1";
+const PLAN_KEY = "stamplogs.showplanned.v1";
 const ISLANDS = ["Luzon","Visayas","Mindanao"];
+
+/* The keys were named ph82.* while the app was called Eighty-Two. Carry a log
+   written under the old names across once, and leave the originals where they
+   are — an older copy of the page still opens them, and nothing is thrown away. */
+const MIGRATED_KEY = "stamplogs.migrated.v1";
+const OLD_KEYS = [
+  ["ph82.visited.v1", SAVE_KEY], ["ph82.nickname.v1", NICK_KEY],
+  ["ph82.trips.v1", TRIP_KEY], ["ph82.groupby.v1", GROUP_KEY],
+  ["ph82.showplanned.v1", PLAN_KEY]
+];
+function migrateKeys(){
+  try{
+    if(localStorage.getItem(MIGRATED_KEY)) return;
+    OLD_KEYS.forEach(function(kv){
+      const was = localStorage.getItem(kv[0]);
+      if(was !== null && localStorage.getItem(kv[1]) === null) localStorage.setItem(kv[1], was);
+    });
+    localStorage.setItem(MIGRATED_KEY, "1");
+  }catch(e){}
+}
+migrateKeys();
 
 const els = {
   svg:document.getElementById('svg'), stage:document.querySelector('.stage'),
@@ -643,7 +664,7 @@ function merc(lon,lat){
 }
 
 function prepare(){
-  provinces = window.PH82.map(p=>({
+  provinces = window.STAMPLOGS.map(p=>({
     name:p.n, region:p.r, island:p.i, id:String(p.id),
     rings:p.g.map(g=>decode(g).map(c=>merc(c[0],c[1])))
   }));
@@ -964,9 +985,14 @@ const PLANNED="#E4A97D", PLANNED_INK="#C2814F";
 const SANS="'Helvetica Neue',Helvetica,Arial,sans-serif";
 const SERIF="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif";
 
+/* A saved file is named nickname-stamplogs-date, or just stamplogs-date when the
+   log has no nickname. The extension tells the map from the log. */
 function slugName(){
-  const t = (logTitle() || "eighty-two").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
-  return t || "eighty-two";
+  const n = nickname.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  return (n ? n + "-" : "") + "stamplogs";
+}
+function fileName(ext){
+  return slugName() + "-" + new Date().toISOString().slice(0,10) + "." + ext;
 }
 function mk(tag, attrs, text){
   const e = document.createElementNS(NS, tag);
@@ -988,7 +1014,7 @@ function poster(){
 
   const svg = mk("svg",{xmlns:NS, width:W, height:H, viewBox:"0 0 "+W+" "+H});
   svg.appendChild(mk("rect",{x:0,y:0,width:W,height:H,fill:PAPER}));
-  const title = logTitle() || "Eighty-Two";
+  const title = logTitle() || "StampLogs";
   const tsize = Math.max(24, Math.min(44, Math.round(1400/Math.max(12, title.length))));
   svg.appendChild(mk("text",{x:mid,y:74,"text-anchor":"middle","font-family":SERIF,
     "font-size":tsize,"font-weight":600,fill:INK}, title));
@@ -1052,7 +1078,7 @@ document.getElementById('png').onclick = ()=>{
           const a = document.createElement('a');
           url = URL.createObjectURL(b);
           a.href = url;
-          a.download = slugName() + "-map-" + new Date().toISOString().slice(0,10) + ".png";
+          a.download = fileName("png");
           a.click();
           setTimeout(()=>URL.revokeObjectURL(url), 4000);
           toast("Saved an image of your map");
@@ -1065,7 +1091,7 @@ document.getElementById('png').onclick = ()=>{
 };
 
 /* ── photos: one per province, held in IndexedDB on this device only ── */
-const PHOTO_DB = "ph82-photos", PHOTO_STORE = "photos";
+const PHOTO_DB = "stamplogs-photos", OLD_PHOTO_DB = "ph82-photos", PHOTO_STORE = "photos";
 const MAX_FULL = 1600, MAX_THUMB = 320;
 let photoIds = new Set();
 let dbp = null;
@@ -1093,6 +1119,42 @@ const photoDel   = id  => ptx("readwrite", st=> st.delete(id));
 const photoKeys  = ()  => ptx("readonly",  st=> st.getAllKeys());
 const photoAll   = ()  => ptx("readonly",  st=> st.getAll());
 const photoClear = ()  => ptx("readwrite", st=> st.clear());
+
+/* Photos sat in a database called ph82-photos under the old name. Copy them over
+   once, only into an empty store, and leave the old database untouched. */
+const PHOTO_MIGRATED_KEY = "stamplogs.photos.migrated.v1";
+function readOldPhotos(){
+  return new Promise(function(ok, no){
+    const rq = indexedDB.open(OLD_PHOTO_DB, 1);
+    let fresh = false;
+    rq.onupgradeneeded = ()=>{ fresh = true; };   /* it did not exist — nothing to carry */
+    rq.onsuccess = ()=>{
+      const d = rq.result;
+      if(fresh || !d.objectStoreNames.contains(PHOTO_STORE)){ d.close(); ok([]); return; }
+      try{
+        const t = d.transaction(PHOTO_STORE, "readonly"), g = t.objectStore(PHOTO_STORE).getAll();
+        t.oncomplete = ()=>{ d.close(); ok(g.result || []); };
+        t.onerror = ()=>{ d.close(); ok([]); };
+      }catch(e){ d.close(); ok([]); }
+    };
+    rq.onerror = ()=> ok([]);
+    rq.onblocked = ()=> ok([]);
+  });
+}
+async function migratePhotos(){
+  try{
+    if(localStorage.getItem(PHOTO_MIGRATED_KEY)) return;
+    if(indexedDB.databases){
+      const names = (await indexedDB.databases()).map(d=> d && d.name);
+      if(names.indexOf(OLD_PHOTO_DB) < 0){ localStorage.setItem(PHOTO_MIGRATED_KEY,"1"); return; }
+    }
+    const recs = await readOldPhotos();
+    if(recs.length && !(await photoKeys()).length){
+      for(const r of recs){ try{ await photoPut(r); }catch(e){} }
+    }
+    localStorage.setItem(PHOTO_MIGRATED_KEY, "1");
+  }catch(e){}
+}
 
 async function loadPhotoIndex(){
   try{ photoIds = new Set((await photoKeys()).map(String)); }catch(e){ photoIds = new Set(); }
@@ -1408,14 +1470,13 @@ document.getElementById('export').onclick = async ()=>{
   const dated = rows.length - stamped;
   const tally = stamped + " provinces" + (dated ? " and " + dated + " dated" : "");
   const meta = {
-    app:"eighty-two", version:1, appVersion:APP_VERSION, exported:new Date().toISOString(),
+    app:"stamplogs", version:1, appVersion:APP_VERSION, exported:new Date().toISOString(),
     nickname:nickname, count:stamped, total:provinces.length,
     photos:photoIds.size, provinces:rows
   };
-  const stamp = new Date().toISOString().slice(0,10);
   const text = JSON.stringify(meta, null, 2);
   if(!photoIds.size){
-    download(new Blob([text], {type:"application/json"}), slugName()+"-log-"+stamp+".json");
+    download(new Blob([text], {type:"application/json"}), fileName("json"));
     toast("Saved "+tally+" to a file");
     return;
   }
@@ -1427,7 +1488,7 @@ document.getElementById('export').onclick = async ()=>{
       if(!r || !r.full) continue;
       files.push({name:"images/"+r.id+".jpg", data:new Uint8Array(await r.full.arrayBuffer())});
     }
-    download(zipWrite(files), slugName()+"-log-"+stamp+".zip");
+    download(zipWrite(files), fileName("zip"));
     toast("Saved "+tally+" and "+(files.length-1)+" photos");
   }catch(e){ toast("The file could not be written"); }
 };
@@ -1490,7 +1551,7 @@ document.getElementById('file').onchange = async e=>{
     repaintAll();
     toast("Loaded "+r.loaded+" provinces" + (np ? " and "+np+" photos" : "") +
           (r.skipped ? " — "+r.skipped+" unrecognised" : ""));
-  }catch(err){ toast("That file is not an Eighty-Two log"); }
+  }catch(err){ toast("That file is not a StampLogs log"); }
 };
 /* Stamps and photos are cleared separately — wiping a map should not silently
    destroy pictures. An in-page dialog, since confirm() is suppressed in some frames. */
@@ -1566,7 +1627,7 @@ drawMap();
 syncGroupToggle();
 buildList();
 paintStats();
-loadPhotoIndex();
+migratePhotos().then(loadPhotoIndex, loadPhotoIndex);
 </script>
 </body>
 </html>
