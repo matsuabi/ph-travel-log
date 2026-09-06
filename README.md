@@ -87,6 +87,28 @@ files would not satisfy.
 
 ## Log
 
+### 1.4.0 — 2026-09-06
+
+- Added: a **Tools** menu on phones. The five header buttons fold behind one
+  trigger, so the header stays a single row instead of wrapping into two — the
+  menu closes on a pick, on a tap outside, or on Escape.
+- Added: **All provinces** folds away on phones, with the count shown alongside
+  when it is closed. It starts closed on a narrow screen and open otherwise, and
+  the map takes the height the list gives up.
+- Changed: on a phone the map is fitted into the band above the province panel
+  and aligned to the top, so an open panel no longer covers any province. The fit
+  is redone when the panel opens, closes, or changes height.
+- Changed: the lead line is drawn on narrow screens too — from the province to
+  the top edge of the panel, rather than being hidden.
+- Changed: the province panel is a compact card on a phone — the date field and
+  the Traveled/Planned switch share a row, tap targets are taller, the actions sit
+  on one line, and the hint text is dropped.
+- Changed: the map is taller on a phone (62vh, at least 430px; it was 46vh and
+  290px), and taller still while the list is folded away.
+
+Nothing outside the phone layout changes: saved files, storage keys and the file
+format are untouched.
+
 ### 1.3.0 — 2026-09-06
 
 - Changed: the app is now called **StampLogs** — the page title, the wordmark, the

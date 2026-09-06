@@ -36,6 +36,9 @@
   .wordmark span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
   header .spacer{flex:1}
   .tools{display:flex;gap:6px;align-self:center;flex-wrap:wrap}
+  #tools-toggle{display:none}
+  #tools-scrim{display:none;position:fixed;left:0;right:0;top:65px;bottom:0;background:rgba(27,29,26,.34);z-index:6}
+  .tools[hidden],#tools-scrim[hidden]{display:none}
   .ghost{
     font:500 12px/1 var(--sans);padding:11px 13px;border:1px solid var(--rule);
     border-radius:2px;background:transparent;color:var(--ink-2);cursor:pointer;min-height:38px;
@@ -243,6 +246,7 @@
   .planrow .t small{display:block;margin-top:3px;font-size:11px;color:var(--ink-2)}
   .planrow:hover .t{color:var(--clay)}
 
+  .listtoggle{display:none}
   .listhead{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
   .listhead input{
     flex:1;min-width:130px;border:0;background:transparent;font:400 15px var(--sans);color:var(--ink);
@@ -292,17 +296,63 @@
     header .spacer{display:none}
     .wordmark h1{font-size:17px}
     .wordmark span{display:none}
-    .tools{width:100%;gap:5px}
-    .tools .ghost{flex:1 1 auto;min-width:92px;padding:11px 4px;font-size:11px}
-    .callout{
-      top:auto;left:12px;right:12px;bottom:12px;width:auto;
-      max-height:calc(100% - 84px);
+    #tools-toggle{display:flex;margin-left:auto}
+    .tools{
+      position:absolute;right:18px;top:64px;width:198px;z-index:7;
+      flex-direction:column;flex-wrap:nowrap;gap:0;width:198px;
+      background:var(--panel);border:1px solid var(--ink);border-radius:2px;
+      box-shadow:0 10px 30px rgba(27,29,26,.16);
     }
-    .lead{display:none}
+    .tools .ghost{
+      border:0;border-bottom:1px solid var(--rule);border-radius:0;
+      justify-content:flex-start;min-height:46px;padding:0 15px;
+      font:400 13.5px/1 var(--sans);
+    }
+    .tools .ghost:last-child{border-bottom:0}
+    #tools-scrim{display:block}
+    /* the panel is the thing being used on a phone: give it room, and keep
+       everything in it reachable without a scroll inside a scroll */
+    .callout{
+      top:auto;left:10px;right:10px;bottom:10px;width:auto;
+      height:auto;max-height:calc(100% - 190px);
+    }
+    .callout header{padding:13px 15px 12px}
+    .callout h2{font-size:17px}
+    .callout .x{font-size:26px;height:32px;padding:0 6px;margin-right:-4px}
+    .callout .pbody{padding:13px 15px 4px;gap:12px}
+    .callout .meta{gap:8px}
+    .trip .date{min-height:44px;padding:11px 12px;font-size:14px}
+    .trip .seg button{min-height:40px;padding:12px 10px}
+    .callout .trip{flex-direction:row;align-items:center;gap:8px}
+    .callout .trip .fld{flex:1;min-width:0}
+    .callout .trip .fld > span{display:none}
+    .callout .trip .seg{flex:none;margin-left:0}
+    .callout .empty{padding:13px 14px;text-align:left;font-size:12px;line-height:1.45}
+    .callout .note{display:none}
+    .callout .acts{padding:12px 15px;gap:8px;flex-wrap:wrap}
+    .callout .acts .grow{display:none}
+    .callout .acts .ghost,.callout .acts .filelabel{
+      flex:1 1 0;min-width:0;justify-content:center;text-align:center;
+      min-height:46px;white-space:nowrap;
+    }
+    .callout .acts .go{flex:1 1 100%;font-size:13px}
+
+    /* the list folds away, so the map and the panel get the screen */
+    .listtoggle{
+      display:flex;align-items:center;gap:10px;width:100%;
+      padding:0 18px;min-height:54px;border:0;border-bottom:1px solid var(--rule);
+      background:var(--panel);font:500 13px/1 var(--sans);color:var(--ink);
+      text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    }
+    .listtoggle em{font-style:normal;font-size:11.5px;color:var(--ink-2);margin-left:auto}
+    .listtoggle i{font-style:normal;font-size:10px;color:var(--ink-2)}
+    aside[data-list="off"] .listtoggle{border-bottom:0}
+    aside[data-list="off"] .listhead,aside[data-list="off"] .list{display:none}
+    main:has(aside[data-list="off"]) .stage{height:74vh}
     .sheet dl{padding:4px 18px 20px}
     .sheet header{padding:16px 18px 13px}
     .sheet .sig{padding:14px 18px}
-    .stage{height:46vh;min-height:290px}
+    .stage{height:62vh;min-height:430px}
     .hud{left:14px;bottom:12px}
     .tally{padding:20px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
     .tally .big{grid-row:1/3}
@@ -327,7 +377,8 @@
       <span>Philippine province log</span>
     </div>
     <div class="spacer"></div>
-    <div class="tools">
+    <button class="ghost" id="tools-toggle" aria-expanded="false" aria-controls="tools">Tools</button>
+    <div class="tools" id="tools">
       <button class="ghost" id="export">Save file</button>
       <button class="ghost" id="png">Save image</button>
       <button class="ghost" id="import">Load file</button>
@@ -336,6 +387,7 @@
     </div>
     <input type="file" id="file" accept=".json,.zip,application/json,application/zip" hidden>
   </header>
+  <div id="tools-scrim" hidden></div>
 
   <main>
     <div class="stage">
@@ -397,6 +449,9 @@
         <input type="checkbox" id="showplan" checked>
         <span class="t">Show planned provinces<small id="planned-n"></small></span>
       </label>
+      <button class="listtoggle" id="listtoggle" aria-expanded="true" aria-controls="list">
+        <span>All provinces</span><em class="mono" id="listtoggle-n"></em><i aria-hidden="true">&#9662;</i>
+      </button>
       <div class="listhead">
         <input id="q" type="search" placeholder="Find a province" autocomplete="off" autocapitalize="none">
         <span class="n mono" id="qn"></span>
@@ -525,7 +580,7 @@
 const SAVE_KEY = "stamplogs.visited.v1";
 const NICK_KEY = "stamplogs.nickname.v1";
 const TRIP_KEY = "stamplogs.trips.v1";
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.4.0";
 const APP_NAME = "StampLogs";
 const APP_TITLE = "StampLogs \u2014 Philippine Province Log";
 const UNDATED = "undated";
@@ -677,9 +732,15 @@ function fit(){
   provinces.forEach(p=>p.rings.forEach(r=>r.forEach(c=>{
     if(c[0]<x0)x0=c[0]; if(c[0]>x1)x1=c[0]; if(c[1]<y0)y0=c[1]; if(c[1]>y1)y1=c[1];
   })));
-  const s = Math.min((w-2*pad)/(x1-x0), (h-2*pad)/(y1-y0));
-  base = {s, tx:(w-(x1-x0)*s)/2 - x0*s, ty:(h+(y1+ -y0)*0 )/2 + y1*s + ( (h-(y1-y0)*s)/2 - (h)/2 )};
-  base.ty = (h-(y1-y0)*s)/2 + y1*s;
+  /* under 600px the callout is a fixed card on the bottom edge: fit the whole
+     map into the band above it and align it to the top, so no province is
+     covered and the lead line can always reach the one that is open */
+  const inset = (w <= 600 && provBox && !provBox.hidden)
+    ? Math.round((provBox.getBoundingClientRect().height || 162) + 22) : 0;
+  const availH = h - inset;
+  const s = Math.min((w-2*pad)/(x1-x0), (availH-2*pad)/(y1-y0));
+  base = {s, tx:(w-(x1-x0)*s)/2 - x0*s, ty:0};
+  base.ty = inset ? pad + y1*s : (h-(y1-y0)*s)/2 + y1*s;
   provinces.forEach(p=>{
     let d = "", best = null, bestLen = -1, cx = 0, cy = 0;
     p.rings.forEach(r=>{
@@ -1218,13 +1279,14 @@ function showLead(on){
 function drawLead(){
   if(!sheetProv || provBox.hidden || !sheetProv.c){ showLead(false); return; }
   const s = els.stage.getBoundingClientRect(), c = provBox.getBoundingClientRect();
-  /* on narrow screens the callout spans the stage and .lead is display:none — no line */
   showLead(true);
   if(c.width < 40 || getComputedStyle(leadSvg).display === "none"){ showLead(false); return; }
   const x = sheetProv.c[0]*view.k + view.x, y = sheetProv.c[1]*view.k + view.y;
+  /* wide: the callout's lower-left corner. narrow: its top edge, under the province */
+  const wide = c.width < s.width - 40;
   leadLine.setAttribute("x1", x); leadLine.setAttribute("y1", y);
-  leadLine.setAttribute("x2", c.left - s.left);
-  leadLine.setAttribute("y2", c.bottom - s.top);
+  leadLine.setAttribute("x2", wide ? c.left - s.left : Math.max(30, Math.min(s.width - 30, x)));
+  leadLine.setAttribute("y2", wide ? c.bottom - s.top : c.top - s.top);
   leadDot.setAttribute("cx", x); leadDot.setAttribute("cy", y);
 }
 function dropSheetURL(){ if(sheetURL){ URL.revokeObjectURL(sheetURL); sheetURL = null; } }
@@ -1252,7 +1314,7 @@ async function openProv(p){
   paintProvState();
   paintTrip();
   provBox.hidden = false;
-  drawLead();
+  relayout();
   await paintSheetPhoto();
   document.getElementById('prov-close').focus({preventScroll:true});
 }
@@ -1335,6 +1397,7 @@ tripKind.onclick = e=>{
 function closeProv(){
   provBox.hidden = true; showLead(false);
   dropSheetURL(); sheetProv = null;
+  relayout();
 }
 document.getElementById('prov-close').onclick = closeProv;
 
@@ -1612,7 +1675,26 @@ document.addEventListener('keydown', e=>{
   else showAbout(false);
 });
 
-let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(relayout, 150); });
+/* mobile tools menu: the five buttons live behind one trigger so the header
+   stays a single row and the map keeps the height the wrapped rows used to take */
+const toolsEl = document.getElementById('tools');
+const toolsBtn = document.getElementById('tools-toggle');
+const toolsScrim = document.getElementById('tools-scrim');
+function isNarrow(){ return window.matchMedia('(max-width:600px)').matches; }
+function setTools(on){
+  const open = !!on && isNarrow();
+  toolsEl.hidden = open ? false : isNarrow();
+  toolsScrim.hidden = !open;
+  toolsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function syncTools(){ if(isNarrow()) setTools(false); else { toolsEl.hidden = false; toolsScrim.hidden = true; } }
+toolsBtn.onclick = ()=> setTools(toolsEl.hidden);
+toolsScrim.onclick = ()=> setTools(false);
+toolsEl.addEventListener('click', e=>{ if(e.target.closest('.ghost')) setTools(false); });
+document.addEventListener('keydown', e=>{ if(e.key === "Escape" && !toolsScrim.hidden) setTools(false); });
+syncTools();
+
+let rt; window.addEventListener('resize', ()=>{ clearTimeout(rt); rt = setTimeout(()=>{ syncTools(); relayout(); }, 150); });
 if(window.ResizeObserver){
   let ro = null;
   ro = new ResizeObserver(()=>{ clearTimeout(rt); rt = setTimeout(relayout, 60); });
@@ -1620,6 +1702,34 @@ if(window.ResizeObserver){
 }
 requestAnimationFrame(relayout);
 window.addEventListener('load', relayout);
+
+/* ── the list folds away on a phone so the map and the panel own the screen ── */
+const asideEl = document.querySelector('aside');
+const listToggle = document.getElementById('listtoggle');
+const narrow = window.matchMedia('(max-width:600px)');
+function setListOpen(open){
+  asideEl.dataset.list = open ? "on" : "off";
+  listToggle.setAttribute('aria-expanded', open ? "true" : "false");
+  listToggle.querySelector('i').textContent = open ? "\u25BE" : "\u25B8";
+  document.getElementById('listtoggle-n').textContent =
+    open ? "" : (provinces.length || 82) + " provinces";
+  if(typeof relayout === "function") relayout();
+}
+setListOpen(!narrow.matches);
+narrow.addEventListener('change', e => setListOpen(!e.matches));
+listToggle.onclick = ()=> setListOpen(asideEl.dataset.list !== "on");
+
+/* the panel's height sets the map's fit, and it changes as the slot, the stamp
+   state and a loading photo change it — refit whenever it actually resizes */
+if(window.ResizeObserver){
+  let lastH = 0;
+  new ResizeObserver(()=>{
+    const h = Math.round(provBox.getBoundingClientRect().height);
+    if(provBox.hidden || Math.abs(h - lastH) < 2) return;
+    lastH = h; relayout();
+  }).observe(provBox);
+}
+
 
 prepare();
 fit();
