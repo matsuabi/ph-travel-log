@@ -37,6 +37,9 @@ python3 -m http.server 8000
   log has no nickname.
 - **Clear** the log, asking about stamps, dates and photos separately.
 
+A **How to use** sheet in the header explains all of it; **About** covers where the
+log is kept, the count of 82, the boundary data and the terms.
+
 ## Files
 
 | File            | What it is                                            |
@@ -86,6 +89,21 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.5.0 — 2026-09-06
+
+- Changed: **How to use** is its own sheet, opened from its own button in the
+  header, and no longer sits at the top of About. About is now what surrounds the
+  app — where the log is kept, the count of 82, the boundary data, the terms and
+  the licence — and the two sheets never open at once.
+- Changed: How to use is written in sections — Stamping, The map, The list, Your
+  log, Dates, Photos, Keeping a copy, and On a phone — rather than one run of
+  entries under a single heading.
+- Added: How to use covers the phone layout from 1.4.0 — the **Tools** menu, the
+  foldable **All provinces** list, and the map fitting into the band above an open
+  province panel — along with the lead line drawn from a province to its panel.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.4.0 — 2026-09-06
 
