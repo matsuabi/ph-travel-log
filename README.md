@@ -19,16 +19,17 @@ python3 -m http.server 8000
 
 ## What it does
 
-- **Stamp provinces** from the list with a click, or by tapping one on the map to
-  open its panel and stamping it there.
+- **Stamp provinces** by tapping one on the map, dating the day you went, then
+  setting it **Stamped**. List rows toggle a dated province straight away.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
 - **Search** the list by name.
 - **Name your log** with a nickname — `Abi's` titles it *Abi's PH travel log*,
   on the page, in the browser tab, and on the exported image.
-- **Date a trip** on any province, stamped or not — a day you *traveled*, or a day
-  you have *planned*. Planned provinces are drawn in clay, and can be hidden.
+- **Date a trip** on any province, *Stamped* or *Planned* — the two are the same
+  statement, so the toggle puts the stamp on and takes it off. Planned provinces
+  are drawn in clay, and can be hidden.
 - **Add a photo** to any stamped province — open it and add one. One photo each,
   picked from this device, kept in this browser and never uploaded.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
@@ -89,6 +90,20 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.6.0 — 2026-09-12
+
+- Changed: **Traveled** is now **Stamped**, and the toggle is the stamp — Stamped
+  stamps the province, Planned lifts it.
+- Changed: a stamp needs a date, so stamping asks for the day first.
+- Removed: **Stamp this province** and **Remove stamp**.
+- Changed: the readout shows the day you went, not the day the stamp went on.
+- Changed: the photo sits in a fixed frame, with **Add photo** / **Remove photo**
+  under it.
+- Changed: the tagline is *Plan and stamp your map*.
+- Changed: **Clear** turns stamped dates back to planned.
+
+Older files still load; the file format stays at `version: 1`.
 
 ### 1.5.0 — 2026-09-06
 

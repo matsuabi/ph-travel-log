@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FBFAF6">
-<title>StampLogs — Philippine Province Log</title>
+<title>StampLogs — Plan and stamp your map</title>
 <style>
   :root{
     --paper:#F2EFE7; --panel:#FBFAF6; --ink:#1B1D1A; --ink-2:#6E7169;
@@ -137,9 +137,15 @@
   .nick:focus{border-bottom-color:var(--clay);color:var(--ink)}
 
   /* ── province callout: the photo sits on the map, tied to the province ── */
+  /* the frame owns the height and the photo is fitted inside it, so a tall
+     photo can never run past the frame and over the controls below */
+  #prov-slot{display:flex;flex-direction:column;min-height:72px}
+  .photoframe{
+    flex:1 1 auto;width:100%;aspect-ratio:4/3;min-height:72px;max-height:420px;
+    overflow:hidden;background:var(--unvisited);border-radius:2px;
+  }
   .photo{
-    display:block;width:100%;height:auto;object-fit:contain;
-    background:var(--unvisited);border-radius:2px;
+    display:block;width:100%;height:100%;object-fit:contain;
   }
   .lead{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
   .lead[hidden]{display:none}
@@ -161,6 +167,9 @@
     padding:14px 16px 6px;display:flex;flex-direction:column;gap:12px;
     overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;
   }
+  /* only the photo gives way when the panel is short; the rest keeps its size */
+  .callout .pbody > *{flex:0 0 auto}
+  .callout .pbody > #prov-slot{flex:0 1 auto}
   .callout .meta{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
   .callout .meta .rg{
     font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
@@ -184,8 +193,12 @@
   .trip .seg button{flex:1}
   .trip .seg[data-set="0"] button[aria-pressed="true"]{background:var(--rule-2);color:var(--ink-2)}
   .trip .note{font-size:11.5px;color:var(--ink-2);line-height:1.45}
-  .callout .acts{padding:12px 16px}
   .callout .empty{padding:26px 18px;font-size:12.5px}
+  /* the photo's one control sits under it, not in a bar of its own */
+  .callout .photoact{display:flex;margin-top:-2px;padding-bottom:4px}
+  .photoact[hidden]{display:none}
+  .photoact > *{flex:1;justify-content:center;text-align:center}
+  .photoact .danger:hover{color:#A8412A;border-color:#A8412A}
   .empty{
     border:1px dashed var(--rule);border-radius:2px;padding:30px 20px;text-align:center;
     color:var(--ink-2);font-size:13px;line-height:1.5;
@@ -203,8 +216,6 @@
   .filelabel:hover{color:var(--clay);border-color:var(--clay)}
   .filelabel[hidden]{display:none}
   .trip[hidden]{display:none}
-  .acts .go{border-color:var(--ink);color:var(--ink)}
-  .acts .go:hover{background:var(--ink);color:var(--panel);border-color:var(--ink)}
   .filelabel input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
   .busy{font-size:12px;color:var(--ink-2)}
 
@@ -329,13 +340,9 @@
     .callout .trip .seg{flex:none;margin-left:0}
     .callout .empty{padding:13px 14px;text-align:left;font-size:12px;line-height:1.45}
     .callout .note{display:none}
-    .callout .acts{padding:12px 15px;gap:8px;flex-wrap:wrap}
-    .callout .acts .grow{display:none}
-    .callout .acts .ghost,.callout .acts .filelabel{
-      flex:1 1 0;min-width:0;justify-content:center;text-align:center;
-      min-height:46px;white-space:nowrap;
-    }
-    .callout .acts .go{flex:1 1 100%;font-size:13px}
+    .callout .photoact > *{min-height:46px;white-space:nowrap}
+    /* on a phone the frame gives way first, so the controls stay in reach */
+    .callout .photoframe{aspect-ratio:3/2;max-height:46vh}
 
     /* the list folds away, so the map and the panel get the screen */
     .listtoggle{
@@ -374,7 +381,7 @@
   <header>
     <div class="wordmark">
       <h1>StampLogs</h1>
-      <span>Philippine province log</span>
+      <span>Plan and stamp your map</span>
     </div>
     <div class="spacer"></div>
     <button class="ghost" id="tools-toggle" aria-expanded="false" aria-controls="tools">Tools</button>
@@ -400,7 +407,7 @@
           <button id="z-out" aria-label="Zoom out">&minus;</button>
           <button id="z-reset" class="wide" aria-label="Reset view">FIT</button>
         </div>
-        <div class="hint">Tap a province to open it, then date the trip or stamp it from the panel. Pinch or scroll to zoom, drag to pan.</div>
+        <div class="hint">Tap a province to open it, then date the trip and set it stamped or planned. Pinch or scroll to zoom, drag to pan.</div>
       </div>
 
       <svg class="lead" id="lead" aria-hidden="true" hidden>
@@ -418,20 +425,17 @@
             <label class="fld" for="prov-date"><span>Date</span>
               <input type="date" id="prov-date" class="date"></label>
             <div class="seg" id="prov-kind" data-set="0" role="group" aria-label="What this date is">
-              <button type="button" data-kind="traveled" aria-pressed="true">Traveled</button>
+              <button type="button" data-kind="traveled" aria-pressed="true">Stamped</button>
               <button type="button" data-kind="planned" aria-pressed="false">Planned</button>
             </div>
             <div class="note" id="prov-kind-note"></div>
           </div>
           <div id="prov-slot"></div>
-        </div>
-        <div class="acts">
-          <button class="ghost go" id="prov-stamp">Stamp this province</button>
-          <label class="filelabel" id="prov-add">Add photo
-            <input type="file" id="prov-file" accept="image/*"></label>
-          <button class="ghost danger" id="prov-rmphoto" hidden>Remove photo</button>
-          <span class="grow"></span>
-          <button class="ghost danger" id="prov-unstamp">Remove stamp</button>
+          <div class="photoact" id="prov-photoact">
+            <label class="filelabel" id="prov-add">Add photo
+              <input type="file" id="prov-file" accept="image/*"></label>
+            <button class="ghost danger" id="prov-rmphoto" hidden>Remove photo</button>
+          </div>
         </div>
       </div>
     </div>
@@ -497,9 +501,12 @@
     </header>
     <dl>
       <dt>Stamping</dt>
-      <dd><b>Stamp a province</b> by tapping it on the map to open its panel, then
-        <b>Stamp this province</b>. Tapping its row in the list stamps it straight away, and
-        tapping that row again takes the stamp off.
+      <dd><b>Stamp a province</b> by tapping it on the map to open its panel, picking the day you
+        went in <b>Date</b>, then <b>Stamped</b>. A stamp always sits on a dated day,
+        so an empty date is asked for before the stamp goes on. Tapping a row in the list stamps a
+        province that is already dated straight away, opens its panel to ask for a date when it has
+        none, and takes the stamp off when it is tapped again. <b>Planned</b> takes a stamp
+        back off from the panel.
         <small>Stamped provinces turn green on the map and show a tick in the list. The count,
         the percentage and the island bars all follow along.</small></dd>
 
@@ -527,21 +534,26 @@
 
       <dt>Dates</dt>
       <dd><b>Date the trip</b> in the panel that opens when you tap any province, stamped or not.
-        Pick a day in <b>Date</b>, then say whether it is a day you have <b>Planned</b> or the day you
-        <b>Traveled</b>. A province you have not stamped starts on <b>Planned</b>, so a trip can be laid
-        out before you go.
+        Pick a day in <b>Date</b>, then say whether it is a day you have <b>Planned</b> or a day you
+        have <b>Stamped</b>. A province you have not stamped starts on <b>Planned</b>, so a trip can be laid
+        out before you go, and a stamp cannot go on until a date is there to carry
+        it. <b>Stamped</b> and the stamp are one and the same: setting a date to
+        <b>Stamped</b> stamps the province, and taking the stamp off puts its date back to
+        <b>Planned</b> &mdash; so the map never shows a day you went without a stamp on it.
         <small>A province you have planned but not yet stamped is drawn in clay on the map, so a
         trip you have laid out reads at a glance against the green of the ones behind you. Stamp it
         and it turns green. Untick <b>Show planned provinces</b> in the sidebar to leave the plans out
         of the map, the list and the saved image &mdash; the dates themselves stay where they are.
         The date is yours to set and is separate from the stamp date, which is simply the day the
-        stamp went on. It is saved with the log and comes back when you load one. Taking the stamp
-        off leaves the date alone &mdash; empty the field to clear it.</small></dd>
+        stamp went on. It is saved with the log and comes back when you load one. The date survives
+        the stamp coming off, as a plan &mdash; empty the field to clear it.</small></dd>
 
       <dt>Photos</dt>
       <dd><b>Add a photo</b> from the panel of a province you have already stamped &mdash; the photo is
         the one thing that waits for the stamp. One photo each,
-        picked from this device. Provinces holding a photo carry a small dot in the list.
+        picked from this device, with <b>Add photo</b> under the empty frame. Once a photo is in,
+        that same place offers <b>Remove photo</b> instead. Provinces holding a photo carry a small
+        dot in the list.
         <small>Photos are kept in this browser and are never uploaded. They are shrunk on the way
         in, which also strips the location and camera data your phone attaches to a picture.</small></dd>
 
@@ -617,7 +629,7 @@
 const SAVE_KEY = "stamplogs.visited.v1";
 const NICK_KEY = "stamplogs.nickname.v1";
 const TRIP_KEY = "stamplogs.trips.v1";
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.6.0";
 const APP_NAME = "StampLogs";
 const APP_TITLE = "StampLogs";
 const UNDATED = "undated";
@@ -701,7 +713,7 @@ function setTrip(id, date, kind){
   saveTrips();
   return t;
 }
-function tripLabel(t){ return t ? (t.kind === "planned" ? "planned for " : "traveled ") + t.date : ""; }
+function tripLabel(t){ return t ? (t.kind === "planned" ? "planned for " : "stamped ") + t.date : ""; }
 /* A province is shown as planned while the trip is still ahead of the stamp —
    once it is stamped the stamp is the truer thing to say, so green wins. */
 function isPlanned(id){
@@ -840,7 +852,9 @@ function setHot(p){
   const b = document.createElement('span'); b.textContent = p.name;
   const e = document.createElement('em');
   const trip = trips[String(p.id)];
-  e.textContent = visited[p.id] ? stampLabel(visited[p.id])
+  /* the trip date is the day it was stamped for, so it is the truer thing to say
+     when there is one — rather than the day the stamp itself went on. */
+  e.textContent = visited[p.id] ? (trip ? tripLabel(trip) : stampLabel(visited[p.id]))
                 : showsPlan(p.id) ? tripLabel(trip)
                 : p.region;
   els.readout.append(b, e);
@@ -856,10 +870,17 @@ function mark(id, on){
   if(on) visited[id] = new Date().toISOString().slice(0,10);
   else delete visited[id];   /* the date outlives the stamp — it may be a plan */
   save();
+  /* the stamp and a traveled date are the same statement, so they move together:
+     stamping carries a plan over to traveled, and taking the stamp off puts the
+     date back to planned rather than leaving a traveled day with no stamp. */
+  const t = trips[String(id)];
+  if(t && t.kind !== (on ? "traveled" : "planned"))
+    setTrip(id, t.date, on ? "traveled" : "planned");
   paintProv(p);
   if(on) burst(p);
   if(hot === p){ hot = null; setHot(p); }
-  if(sheetProv === p) repaintProv();
+  if(sheetProv === p){ repaintProv(); paintTrip(); }
+  paintPlanRow();
   paintStats();
 }
 function burst(p){
@@ -984,7 +1005,15 @@ function buildList(){
       b.innerHTML = '<span class="tick"></span><span class="nm"></span><span class="rg"></span>';
       b.querySelector('.nm').textContent = p.name;
       b.querySelector('.rg').textContent = groupBy === "region" ? p.island : p.region;
-      b.onclick = ()=> mark(p.id, b.dataset.on!=="1");
+      b.onclick = ()=>{
+        const on = b.dataset.on !== "1";
+        /* the list has no date field of its own, so it hands over to the panel */
+        if(on && !trips[String(p.id)]){
+          setHot(p); openProv(p).then(()=>{ wantStamp = true; askForDate(STAMP_ASK); });
+          return;
+        }
+        mark(p.id, on);
+      };
       b.onmouseenter = ()=>{ setHot(p); els.readout.style.opacity = 0; };
       b.onmouseleave = ()=> setHot(null);
       els.list.appendChild(b);
@@ -1117,7 +1146,7 @@ function poster(){
   svg.appendChild(mk("text",{x:mid,y:74,"text-anchor":"middle","font-family":SERIF,
     "font-size":tsize,"font-weight":600,fill:INK}, title));
   svg.appendChild(mk("text",{x:mid,y:106,"text-anchor":"middle","font-family":SANS,
-    "font-size":13,"letter-spacing":2.4,fill:INK2},"PHILIPPINE PROVINCE LOG"));
+    "font-size":13,"letter-spacing":2.4,fill:INK2},"PLAN AND STAMP YOUR MAP"));
   svg.appendChild(mk("line",{x1:PAD,y1:HEAD-36,x2:W-PAD,y2:HEAD-36,stroke:RULE,"stroke-width":1}));
 
   provinces.forEach(p=>{
@@ -1334,9 +1363,8 @@ function paintProvState(){
   const on = !!(sheetProv && visited[sheetProv.id]);
   document.getElementById('prov-st').textContent =
     on ? stampLabel(visited[sheetProv.id]) : "not stamped";
-  document.getElementById('prov-stamp').hidden = on;
-  document.getElementById('prov-add').hidden = !on;
-  document.getElementById('prov-unstamp').hidden = !on;
+  /* a photo belongs to a stamp, so its control waits for one */
+  document.getElementById('prov-photoact').hidden = !on;
 }
 async function repaintProv(){
   paintProvState();
@@ -1346,6 +1374,7 @@ async function repaintProv(){
 
 async function openProv(p){
   sheetProv = p;
+  wantStamp = false;
   document.getElementById('prov-h').textContent = p.name;
   document.getElementById('prov-rg').textContent = p.region;
   paintProvState();
@@ -1358,18 +1387,27 @@ async function openProv(p){
 async function paintSheetPhoto(){
   const slot = document.getElementById('prov-slot');
   const rm = document.getElementById('prov-rmphoto');
-  const addLabel = document.getElementById('prov-add').firstChild;
+  const add = document.getElementById('prov-add');
   dropSheetURL(); slot.textContent = "";
   let rec = null;
   try{ rec = sheetProv ? await photoGet(sheetProv.id) : null; }catch(e){}
   if(rec && rec.full){
     sheetURL = URL.createObjectURL(rec.full);
+    const frame = document.createElement('div');
+    frame.className = "photoframe";
+    /* the frame takes the photo's own shape, within limits, so most photos
+       fill it — anything past the limits is fitted inside instead */
+    if(rec.w && rec.h){
+      const r = Math.min(16/9, Math.max(3/4, rec.w / rec.h));
+      frame.style.aspectRatio = r.toFixed(4);
+    }
     const img = document.createElement('img');
     img.className = "photo"; img.src = sheetURL;
     img.alt = "Your photo for " + sheetProv.name;
-    slot.appendChild(img);
+    frame.appendChild(img);
+    slot.appendChild(frame);
     img.onload = drawLead;
-    rm.hidden = false; addLabel.nodeValue = "Replace photo";
+    rm.hidden = false; add.hidden = true;
   } else {
     const d = document.createElement('div');
     d.className = "empty";
@@ -1377,12 +1415,12 @@ async function paintSheetPhoto(){
       ? "No photo yet. Anything you add stays on this device and is never uploaded."
       : "Not stamped yet. Set a date above whenever you like — a photo waits for the stamp.";
     slot.appendChild(d);
-    rm.hidden = true; addLabel.nodeValue = "Add photo";
+    rm.hidden = true; add.hidden = false;
   }
   drawLead();
 }
 
-/* the date field and the traveled / planned toggle */
+/* the date field and the stamped / planned toggle */
 const tripDate = document.getElementById('prov-date');
 const tripKind = document.getElementById('prov-kind');
 const tripNote = document.getElementById('prov-kind-note');
@@ -1398,34 +1436,57 @@ function paintTrip(){
   tripKind.querySelectorAll('button').forEach(b=>{
     b.setAttribute("aria-pressed", b.dataset.kind === kind ? "true" : "false");
   });
-  tripNote.textContent = t ? tripLabel(t)
-    : (defaultKind() === "planned"
-        ? "Pick the day you plan to go. Stamp the province when you get there."
-        : "Pick the day you traveled, or a day you plan to go back.");
+  /* a set date says itself, in the field and on the toggle, so the note is left
+     for the times there is nothing there yet to read. */
+  setNote(t ? "" : defaultKind() === "planned"
+    ? "Pick the day you plan to go. Stamp the province when you get there."
+    : "Planned holds the date until you go. Stamped puts the stamp on.");
+}
+function setNote(msg){
+  tripNote.textContent = msg;
+  tripNote.hidden = !msg;
 }
 function writeTrip(date, kind){
   if(!sheetProv) return;
   const p = sheetProv;
   const t = setTrip(p.id, date, kind);
+  /* the toggle is the same rule from the other end: stamped stamps the province,
+     planned lifts the stamp. mark() leaves the kind alone, it already agrees. */
+  const lifted = !!t && t.kind === "planned" && !!visited[p.id];
+  if(lifted){ delete visited[p.id]; save(); paintProvState(); paintStats(); }
+  const put = !!t && t.kind === "traveled" && !visited[p.id];
+  if(put) mark(p.id, true);
   paintProv(p);   /* a planned date colours the province in */
   paintTrip();
   paintPlanRow();
-  toast(t ? p.name + " " + tripLabel(t) : "Date cleared for " + p.name);
+  toast(t ? p.name + " " + tripLabel(t) + (lifted ? ", stamp lifted" : put ? ", stamped" : "")
+          : "Date cleared for " + p.name);
 }
+/* a tap meant to stamp arrives before the date does, so it waits here for one */
+let wantStamp = false;
 tripDate.onchange = ()=>{
   const cur = sheetProv ? trips[String(sheetProv.id)] : null;
-  writeTrip(tripDate.value, cur ? cur.kind : defaultKind());
+  const kind = tripDate.value && wantStamp ? "traveled" : (cur ? cur.kind : defaultKind());
+  wantStamp = false;
+  writeTrip(tripDate.value, kind);
 };
+const STAMP_ASK = "Pick the day you went — the stamp goes on that date.";
+/* nothing is said about a province without a date to say it on, so an empty field
+   is asked for first rather than acted on. */
+function askForDate(msg){
+  setNote(msg);
+  if(tripDate.showPicker){ try{ tripDate.showPicker(); }catch(err){ tripDate.focus(); } }
+  else tripDate.focus();
+}
 tripKind.onclick = e=>{
   const b = e.target.closest('button'); if(!b || !sheetProv) return;
+  wantStamp = false;
   /* the toggle needs a date to describe, so ask for one first */
   if(!tripDate.value){
     tripKind.querySelectorAll('button').forEach(x=>{
       x.setAttribute("aria-pressed", x === b ? "true" : "false");
     });
-    tripNote.textContent = "Pick a date first — then it is saved as " + b.dataset.kind + ".";
-    if(tripDate.showPicker) { try{ tripDate.showPicker(); }catch(err){ tripDate.focus(); } }
-    else tripDate.focus();
+    askForDate("Pick a date first — then it is saved as " + b.textContent.toLowerCase() + ".");
     return;
   }
   writeTrip(tripDate.value, b.dataset.kind);
@@ -1433,6 +1494,7 @@ tripKind.onclick = e=>{
 
 function closeProv(){
   provBox.hidden = true; showLead(false);
+  wantStamp = false;
   dropSheetURL(); sheetProv = null;
   relayout();
 }
@@ -1470,13 +1532,6 @@ document.getElementById('prov-rmphoto').onclick = async ()=>{
     await paintSheetPhoto();
     toast("Photo removed");
   }catch(e){ toast("The photo could not be removed"); }
-};
-/* mark() repaints the panel of the province it touches, so these only ask for the mark */
-document.getElementById('prov-stamp').onclick = ()=>{
-  if(sheetProv) mark(sheetProv.id, true);
-};
-document.getElementById('prov-unstamp').onclick = ()=>{
-  if(sheetProv) mark(sheetProv.id, false);
 };
 
 /* ── zip: store-only writer, stored + deflate reader ── */
@@ -1603,7 +1658,12 @@ function applyLog(j){
     if(!known.has(id)){ skipped++; return; }
     if(p.stamped !== false) next[id] = p.date || UNDATED;  /* older files stamp every row */
     const t = cleanTrip({date:p.tripDate, kind:p.tripKind});
-    if(t) nextTrips[id] = t;
+    /* older logs could hold either half alone: a stamped row loads as traveled, and
+       a traveled row loads stamped — the day the stamp went on is not in the file. */
+    if(t){
+      nextTrips[id] = (next[id] && t.kind === "planned") ? {date:t.date, kind:"traveled"} : t;
+      if(t.kind === "traveled" && !next[id]) next[id] = UNDATED;
+    }
   });
   visited = next; save();
   trips = nextTrips; saveTrips();
@@ -1685,7 +1745,12 @@ document.getElementById('clear-go').onclick = async ()=>{
   const doP = document.getElementById('clear-photos').checked && photoIds.size > 0;
   closeClear();
   if(!doS && !doD && !doP) return;
-  if(doS){ visited = {}; save(); }
+  if(doS){
+    visited = {}; save();
+    /* a traveled date with nothing stamped would contradict the map */
+    for(const id in trips) if(trips[id].kind === "traveled") trips[id].kind = "planned";
+    saveTrips();
+  }
   if(doD){ trips = {}; saveTrips(); }
   if(doP){
     try{ await photoClear(); photoIds = new Set(); }
