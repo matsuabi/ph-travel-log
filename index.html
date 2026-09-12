@@ -24,7 +24,7 @@
   a{color:var(--visited);text-decoration:none;border-bottom:1px solid var(--rule)}
   a:hover{color:var(--clay);border-bottom-color:currentColor}
   .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-  .app{display:grid;grid-template-rows:auto 1fr;height:100%}
+  .app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100%}
 
   header{
     display:flex;align-items:baseline;gap:14px;
@@ -294,6 +294,87 @@
   .row[data-on="1"] .nm{color:var(--ink-2)}
   .row .rg{font-size:10.5px;color:#A9A79D}
 
+  /* ── photos view: the same log read as a contact sheet ── */
+  .viewbar{
+    display:flex;align-items:center;gap:14px;padding:10px 24px 11px;
+    border-bottom:1px solid var(--rule);background:var(--panel);
+  }
+  .viewbar .seg{margin-left:0}
+  .viewbar .tallyline{margin-left:auto;display:flex;align-items:baseline;gap:7px}
+  .viewbar .tallyline b{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1}
+  .viewbar .tallyline span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+  main,.photos{grid-row:3}
+  .photos{display:none;flex-direction:column;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  body[data-view="photos"] .photos{display:flex}
+  body[data-view="photos"] main{display:none}
+  .sortbar{
+    display:flex;align-items:center;gap:10px;padding:11px 24px;flex:none;
+    border-bottom:1px solid var(--rule);background:var(--panel);
+  }
+  .sortbar > span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#A9A79D}
+  .pgrp{
+    position:sticky;top:0;z-index:2;background:var(--paper);
+    border-bottom:1px solid var(--rule-2);padding:11px 24px;
+    display:flex;gap:10px;align-items:baseline;
+  }
+  .pgrp b{font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  .pgrp span{font-size:11px;color:#A9A79D}
+  .psheet{padding:14px 24px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 12px}
+  .ptile{
+    display:flex;flex-direction:column;gap:6px;border:0;padding:0;background:none;
+    font:inherit;color:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .ptile .th{aspect-ratio:1;border:1px solid var(--rule);background:var(--unvisited);overflow:hidden}
+  .ptile img{display:block;width:100%;height:100%;object-fit:cover}
+  .ptile .nm{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+  .ptile:hover .th{border-color:var(--clay)}
+  .ptile:hover .nm{color:var(--clay)}
+  .pempty{padding:44px 24px;text-align:center;font-size:13px;line-height:1.55;color:var(--ink-2)}
+  .pempty b{display:block;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:7px}
+
+  /* ── one photo on its own: the sheet read one frame at a time ── */
+  .viewer{
+    position:fixed;inset:0;z-index:40;background:var(--paper);
+    display:flex;flex-direction:column;
+  }
+  .viewer[hidden]{display:none}
+  .viewer .vhead{
+    display:flex;align-items:center;gap:12px;flex:none;
+    padding:14px 24px 13px;border-bottom:1px solid var(--rule);background:var(--panel);
+    padding-top:max(14px, env(safe-area-inset-top));
+  }
+  .viewer .vhead .n{font-size:12px;letter-spacing:.12em;color:var(--ink-2)}
+  .viewer .vhead .x{
+    margin-left:auto;border:1px solid var(--rule);border-radius:2px;background:transparent;
+    width:40px;height:40px;display:grid;place-content:center;
+    font-size:22px;line-height:1;color:var(--ink);cursor:pointer;
+  }
+  .viewer .vhead .x:hover{color:var(--clay);border-color:var(--clay)}
+  .vstage{
+    flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    padding:20px 18px;overflow:hidden;touch-action:pan-y;
+  }
+  /* fitted to the width it is given, and never taller than the stage, so the
+     frame sits on the photo itself rather than on an empty band around it */
+  .vstage img{
+    display:block;width:auto;max-width:100%;max-height:100%;
+    border:1px solid var(--rule);background:var(--unvisited);
+    transition:opacity .14s ease;
+  }
+  .vfoot{
+    flex:none;border-top:1px solid var(--rule);background:var(--panel);
+    padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding-bottom:max(14px, env(safe-area-inset-bottom));
+  }
+  .vfoot .vmeta{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .vfoot .vmeta b{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.005em}
+  .vfoot .vmeta span{font-size:12.5px;color:var(--ink-2)}
+  .vfoot .vrg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+  .vfoot .ghost{margin-left:auto;min-height:44px}
+  .vdots{display:flex;gap:5px;align-items:center;flex:none}
+  .vdots i{width:5px;height:5px;border-radius:50%;background:var(--rule);display:block}
+  .vdots i.on{background:var(--ink)}
+
   @media (max-width:1000px){
     .app{height:auto;min-height:100%}
     main{grid-template-columns:1fr;grid-template-rows:auto auto}
@@ -373,6 +454,13 @@
     .seg button{padding:10px 9px}
     .grp{padding:14px 18px 5px}
     .row{padding:0 18px;min-height:52px}
+    .viewbar,.sortbar{padding-left:18px;padding-right:18px}
+    .pgrp{padding:10px 18px}
+    .psheet{padding:13px 18px 20px;grid-template-columns:1fr 1fr 1fr}
+    .pempty{padding:34px 18px}
+    .viewer .vhead{padding-left:18px;padding-right:18px}
+    .vfoot{padding-left:18px;padding-right:18px}
+    .vstage{padding:16px 14px}
   }
 </style>
 </head>
@@ -396,6 +484,14 @@
     <input type="file" id="file" accept=".json,.zip,application/json,application/zip" hidden>
   </header>
   <div id="tools-scrim" hidden></div>
+
+  <div class="viewbar">
+    <div class="seg" id="viewseg" role="group" aria-label="What to show">
+      <button type="button" data-view="map" aria-pressed="true">Map</button>
+      <button type="button" data-view="photos" aria-pressed="false">Photos</button>
+    </div>
+    <div class="tallyline"><b class="mono" id="viewcount">0</b><span>photos</span></div>
+  </div>
 
   <main>
     <div class="stage">
@@ -468,8 +564,37 @@
       <div class="list" id="list"></div>
     </aside>
   </main>
+
+  <section class="photos" id="photos" aria-label="Photos by province">
+    <div class="sortbar">
+      <span>Group by</span>
+      <div class="seg" id="photosort" role="group" aria-label="Group the photos by">
+        <button type="button" data-sort="island" aria-pressed="true">Island</button>
+        <button type="button" data-sort="region" aria-pressed="false">Region</button>
+        <button type="button" data-sort="alpha" aria-pressed="false">A&ndash;Z</button>
+      </div>
+    </div>
+    <div id="photosheet"></div>
+  </section>
 </div>
 <div id="toast" role="status"></div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+  <div class="vhead">
+    <span class="n mono" id="viewer-n"></span>
+    <span class="vdots" id="viewer-dots" aria-hidden="true"></span>
+    <button class="x" id="viewer-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="vstage" id="viewer-stage"><img id="viewer-img" alt=""></div>
+  <div class="vfoot">
+    <div class="vmeta">
+      <b id="viewer-name"></b>
+      <span class="vrg" id="viewer-rg"></span>
+      <span id="viewer-date"></span>
+    </div>
+    <button class="ghost danger" id="viewer-remove">Remove photo</button>
+  </div>
+</div>
 
 <div class="scrim" id="clearbox" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="clear-h">
@@ -549,6 +674,14 @@
         the stamp coming off, as a plan &mdash; empty the field to clear it.</small></dd>
 
       <dt>Photos</dt>
+      <dd><b>See every photo at once</b> with <b>Photos</b> in the bar under the header. It lays
+        your log out as a contact sheet, one thumbnail per province, grouped by <b>Island</b>,
+        by <b>Region</b> or in <b>A&ndash;Z</b> order. Tapping a thumbnail opens that photo on its own,
+        fitted to the width of the screen, with the province, its date and <b>Remove photo</b> under it.
+        Swipe sideways to move through the rest of the sheet in the order it is grouped &mdash; the
+        counter at the top says where you are &mdash; and close it to come back where you left off.
+        <small>Only provinces holding a photo appear on the sheet, and the grouping you pick is
+        remembered.</small></dd>
       <dd><b>Add a photo</b> from the panel of a province you have already stamped &mdash; the photo is
         the one thing that waits for the stamp. One photo each,
         picked from this device, with <b>Add photo</b> under the empty frame. Once a photo is in,
@@ -629,7 +762,7 @@
 const SAVE_KEY = "stamplogs.visited.v1";
 const NICK_KEY = "stamplogs.nickname.v1";
 const TRIP_KEY = "stamplogs.trips.v1";
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.7.0";
 const APP_NAME = "StampLogs";
 const APP_TITLE = "StampLogs";
 const UNDATED = "undated";
@@ -976,7 +1109,9 @@ document.getElementById('z-reset').onclick = ()=>{ view = {k:1,x:0,y:0}; applyVi
 /* ── sidebar ── */
 /* Regions run in island order, then by PSGC code so they read in the official sequence. */
 function groupNames(){
-  if(groupBy !== "region") return ISLANDS.slice();
+  return groupBy !== "region" ? ISLANDS.slice() : regionNames();
+}
+function regionNames(){
   const seen = new Map();
   provinces.forEach(p=>{
     const code = Number(p.id);
@@ -1291,6 +1426,7 @@ function paintPhotoMarks(){
   els.list.querySelectorAll('.row').forEach(r=>{
     r.dataset.photo = photoIds.has(r.dataset.id) ? "1" : "0";
   });
+  if(typeof schedulePhotoSheet === "function") schedulePhotoSheet();
 }
 async function askPersist(){
   try{
@@ -1781,7 +1917,8 @@ document.getElementById('help-close').onclick = ()=> showHelp(false);
 helpBox.onclick = e=>{ if(e.target === helpBox) showHelp(false); };
 document.addEventListener('keydown', e=>{
   if(e.key !== "Escape") return;
-  if(!provBox.hidden) closeProv();
+  if(viewerIsOpen()) closeViewer();
+  else if(!provBox.hidden) closeProv();
   else if(!clearBox.hidden) closeClear();
   else { showAbout(false); showHelp(false); }
 });
@@ -1849,6 +1986,241 @@ syncGroupToggle();
 buildList();
 paintStats();
 migratePhotos().then(loadPhotoIndex, loadPhotoIndex);
+
+/* ── photos view: the same log read as a contact sheet ── */
+const VIEW_KEY = "stamplogs.view.v1", PSORT_KEY = "stamplogs.photosort.v1";
+const photosEl = document.getElementById('photos');
+const viewSeg = document.getElementById('viewseg');
+const sortSeg = document.getElementById('photosort');
+const photoSheetEl = document.getElementById('photosheet');
+let mainView = "map", photoSort = "island", sheetURLs = [], pst = null;
+
+try{ mainView = localStorage.getItem(VIEW_KEY) === "photos" ? "photos" : "map"; }catch(e){}
+try{
+  const s = localStorage.getItem(PSORT_KEY);
+  if(s === "region" || s === "alpha") photoSort = s;
+}catch(e){}
+
+function setView(v){
+  mainView = v === "photos" ? "photos" : "map";
+  try{ localStorage.setItem(VIEW_KEY, mainView); }catch(e){}
+  document.body.dataset.view = mainView;
+  viewSeg.querySelectorAll('button').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.view === mainView));
+  });
+  if(mainView === "photos") buildPhotoSheet(); else relayout();
+}
+function syncSortSeg(){
+  sortSeg.querySelectorAll('button').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.sort === photoSort));
+  });
+}
+viewSeg.onclick = e=>{
+  const b = e.target.closest('button[data-view]');
+  if(b) setView(b.dataset.view);
+};
+sortSeg.onclick = e=>{
+  const b = e.target.closest('button[data-sort]');
+  if(!b || b.dataset.sort === photoSort) return;
+  photoSort = b.dataset.sort;
+  try{ localStorage.setItem(PSORT_KEY, photoSort); }catch(err){}
+  syncSortSeg();
+  buildPhotoSheet();
+  photosEl.scrollTop = 0;
+};
+function dropSheetURLs(){ sheetURLs.forEach(u=> URL.revokeObjectURL(u)); sheetURLs = []; }
+function paintPhotoCount(){ document.getElementById('viewcount').textContent = String(photoIds.size); }
+function schedulePhotoSheet(){
+  paintPhotoCount();
+  if(mainView !== "photos") return;
+  clearTimeout(pst); pst = setTimeout(buildPhotoSheet, 30);
+}
+/* Thumbnails come out of the same store the panel reads, so the sheet is never a
+   second copy of anything — and only a province holding a photo is on it. */
+async function buildPhotoSheet(){
+  const order = [];
+  let recs = [];
+  try{ recs = await photoAll(); }catch(e){}
+  const byId = {};
+  recs.forEach(r=>{ if(r && (r.thumb || r.full)) byId[String(r.id)] = r; });
+  const have = provinces.filter(p=> byId[p.id]);
+  dropSheetURLs();
+  photoSheetEl.textContent = "";
+  if(!have.length){
+    sheetOrder = order;
+    if(viewerIsOpen()) closeViewer();
+    const d = document.createElement('div');
+    d.className = "pempty";
+    const h = document.createElement('b'); h.textContent = "No photos yet";
+    d.append(h, "Stamp a province on the map, then add a photo from its panel. One photo each, kept on this device.");
+    photoSheetEl.appendChild(d);
+    return;
+  }
+  const groups = [];
+  if(photoSort === "alpha"){
+    have.slice().sort((a,b)=> a.name.localeCompare(b.name)).forEach(p=>{
+      const L = p.name.charAt(0).toUpperCase();
+      let g = groups[groups.length-1];
+      if(!g || g.name !== L){ g = {name:L, rows:[], sub:""}; groups.push(g); }
+      g.rows.push(p);
+    });
+    groups.forEach(g=>{ g.sub = g.rows.length + (g.rows.length === 1 ? " province" : " provinces"); });
+  } else {
+    const key = photoSort === "region" ? (p=>p.region) : (p=>p.island);
+    (photoSort === "region" ? regionNames() : ISLANDS.slice()).forEach(name=>{
+      const rows = have.filter(p=> key(p) === name);
+      if(!rows.length) return;
+      groups.push({name:name, rows:rows, sub:rows.length + " of " + provinces.filter(p=> key(p) === name).length});
+    });
+  }
+  groups.forEach(g=>{
+    const h = document.createElement('div');
+    h.className = "pgrp";
+    const nm = document.createElement('b'); nm.textContent = g.name;
+    const ct = document.createElement('span'); ct.className = "mono"; ct.textContent = g.sub;
+    h.append(nm, ct);
+    photoSheetEl.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = "psheet";
+    g.rows.forEach(p=>{
+      const rec = byId[p.id];
+      const b = document.createElement('button');
+      b.className = "ptile"; b.type = "button";
+      const th = document.createElement('span'); th.className = "th";
+      const nm2 = document.createElement('span'); nm2.className = "nm"; nm2.textContent = p.name;
+      const u = URL.createObjectURL(rec.thumb || rec.full);
+      sheetURLs.push(u);
+      const img = document.createElement('img');
+      img.src = u; img.loading = "lazy";
+      img.alt = "Your photo for " + p.name;
+      th.appendChild(img);
+      b.append(th, nm2);
+      /* a tile opens the photo on its own — the sheet's order is kept so the
+         whole log can be read one frame at a time from wherever you started */
+      const at = order.length;
+      order.push(p);
+      b.onclick = ()=> openViewer(at);
+      grid.appendChild(b);
+    });
+    photoSheetEl.appendChild(grid);
+  });
+  sheetOrder = order;
+  if(viewerIsOpen()) syncViewerIndex();
+}
+
+/* ── the photo on its own: fitted to the width, swiped through the sheet ── */
+const viewerEl = document.getElementById('viewer');
+const viewerImg = document.getElementById('viewer-img');
+const viewerStage = document.getElementById('viewer-stage');
+let sheetOrder = [], viewerAt = -1, viewerURL = null;
+
+function viewerIsOpen(){ return !viewerEl.hidden; }
+function dropViewerURL(){ if(viewerURL){ URL.revokeObjectURL(viewerURL); viewerURL = null; } }
+function fmtDay(iso){
+  const d = new Date(iso + "T00:00:00");
+  return isNaN(d) ? iso : d.toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+}
+/* the province's own date, and whether that day is stamped or still planned */
+function viewerDateLine(p){
+  const t = trips[String(p.id)];
+  if(t) return (t.kind === "planned" ? "Planned for " : "Stamped ") + fmtDay(t.date);
+  const v = visited[p.id];
+  return v && v !== UNDATED ? "Stamped " + fmtDay(v) : v ? "Stamped" : "Not dated";
+}
+function paintViewerDots(){
+  const dots = document.getElementById('viewer-dots');
+  dots.textContent = "";
+  if(sheetOrder.length < 2 || sheetOrder.length > 24) return;
+  sheetOrder.forEach((p,i)=>{
+    const d = document.createElement('i');
+    if(i === viewerAt) d.className = "on";
+    dots.appendChild(d);
+  });
+}
+async function paintViewer(){
+  const p = sheetOrder[viewerAt];
+  if(!p){ closeViewer(); return; }
+  document.getElementById('viewer-n').textContent = (viewerAt+1) + " / " + sheetOrder.length;
+  document.getElementById('viewer-name').textContent = p.name;
+  document.getElementById('viewer-rg').textContent = p.region;
+  document.getElementById('viewer-date').textContent = viewerDateLine(p);
+  paintViewerDots();
+  let rec = null;
+  try{ rec = await photoGet(p.id); }catch(e){}
+  if(!viewerIsOpen() || sheetOrder[viewerAt] !== p) return;
+  dropViewerURL();
+  if(rec && (rec.full || rec.thumb)){
+    viewerURL = URL.createObjectURL(rec.full || rec.thumb);
+    viewerImg.src = viewerURL;
+    viewerImg.alt = "Your photo for " + p.name;
+    viewerImg.style.opacity = 1;
+  } else {
+    viewerImg.removeAttribute('src');
+  }
+}
+function openViewer(i){
+  if(i < 0 || i >= sheetOrder.length) return;
+  viewerAt = i;
+  viewerEl.hidden = false;
+  paintViewer();
+  document.getElementById('viewer-close').focus({preventScroll:true});
+}
+function closeViewer(){
+  viewerEl.hidden = true;
+  viewerAt = -1;
+  dropViewerURL();
+  viewerImg.removeAttribute('src');
+}
+/* the sheet can be rebuilt underneath — hold the province, not the index */
+function syncViewerIndex(){
+  const p = viewerAt >= 0 ? sheetOrder[viewerAt] : null;
+  if(!sheetOrder.length){ closeViewer(); return; }
+  if(!p) viewerAt = Math.min(Math.max(viewerAt,0), sheetOrder.length-1);
+  paintViewer();
+}
+function stepViewer(d){
+  if(sheetOrder.length < 2) return;
+  viewerAt = (viewerAt + d + sheetOrder.length) % sheetOrder.length;
+  viewerImg.style.opacity = .25;
+  paintViewer();
+}
+document.getElementById('viewer-close').onclick = closeViewer;
+viewerEl.addEventListener('keydown', e=>{
+  if(e.key === "ArrowRight") stepViewer(1);
+  else if(e.key === "ArrowLeft") stepViewer(-1);
+});
+let vsx = 0, vsy = 0, vswipe = false;
+viewerStage.addEventListener('pointerdown', e=>{
+  vsx = e.clientX; vsy = e.clientY; vswipe = true;
+});
+viewerStage.addEventListener('pointerup', e=>{
+  if(!vswipe) return;
+  vswipe = false;
+  const dx = e.clientX - vsx, dy = e.clientY - vsy;
+  if(Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy)) stepViewer(dx < 0 ? 1 : -1);
+});
+viewerStage.addEventListener('pointercancel', ()=>{ vswipe = false; });
+document.getElementById('viewer-remove').onclick = async ()=>{
+  const p = sheetOrder[viewerAt];
+  if(!p) return;
+  try{
+    await photoDel(p.id);
+    photoIds.delete(String(p.id));
+    if(hot === p){ hot = null; setHot(p); }
+    if(sheetProv === p) await paintSheetPhoto();
+    /* the sheet rebuilds without this province; stay on the frame that takes
+       its place, or close if that was the last photo */
+    sheetOrder = sheetOrder.filter(x=> x !== p);
+    if(!sheetOrder.length) closeViewer();
+    else { viewerAt = Math.min(viewerAt, sheetOrder.length-1); paintViewer(); }
+    paintPhotoMarks();
+    toast("Photo removed from " + p.name);
+  }catch(e){ toast("The photo could not be removed"); }
+};
+
+syncSortSeg();
+paintPhotoCount();
+setView(mainView);
 </script>
 </body>
 </html>

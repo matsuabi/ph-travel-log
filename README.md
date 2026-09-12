@@ -32,6 +32,10 @@ python3 -m http.server 8000
   are drawn in clay, and can be hidden.
 - **Add a photo** to any stamped province — open it and add one. One photo each,
   picked from this device, kept in this browser and never uploaded.
+- **Read the log as photos** — a **Photos** view lays every photo out as a
+  contact sheet, grouped by island, by region or A–Z. Open one and it fills the
+  screen with the province, its date and a way to remove it; swipe to move
+  through the rest.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
 - **Save and load a file** — JSON, or a ZIP when there are photos to carry.
   Saved files are named `nickname-stamplogs-date`, or `stamplogs-date` when the
@@ -60,6 +64,8 @@ Everything is in `localStorage`, under these keys:
 | `stamplogs.groupby.v1`    | Island or region grouping               |
 | `stamplogs.trips.v1`      | Trip dates, each with `date` and `kind` |
 | `stamplogs.showplanned.v1`| Whether planned provinces are drawn     |
+| `stamplogs.view.v1`       | Map or Photos view                      |
+| `stamplogs.photosort.v1`  | How the contact sheet is grouped        |
 
 Photos live separately, in an IndexedDB database called `stamplogs-photos` — one
 record per province holding a display copy and a thumbnail.
@@ -90,6 +96,21 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.7.0 — 2026-09-12
+
+- Added: a **Photos** view, picked in the bar under the header, that reads the log
+  as a contact sheet — one thumbnail per province holding a photo, with the count
+  alongside.
+- Added: the sheet groups by **Island**, by **Region** or **A–Z**, and the pick is
+  remembered.
+- Added: a full-screen photo viewer — open a thumbnail for the province, its
+  region, its date and **Remove photo**; swipe or use the arrow keys to move
+  through the sheet, Escape to close.
+
+The view and its grouping are kept in `stamplogs.view.v1` and
+`stamplogs.photosort.v1`. Nothing else changes: saved files, photos and the file
+format are untouched.
 
 ### 1.6.0 — 2026-09-12
 
