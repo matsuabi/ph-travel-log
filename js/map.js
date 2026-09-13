@@ -3,6 +3,9 @@
 const AB = window.STAMPLOGS_ALPHABET;
 const IDX = {}; for(let i=0;i<AB.length;i++) IDX[AB[i]] = i;
 let provinces = [];
+/* Metro Manila is drawn but never counted: it is a region, not a province, so it
+   stays out of `provinces` and out of everything that reads it. */
+let ncr = null, ncrEl = null, ncrPat = null;
 let gRoot, gStamp, hot = null;
 let view = {k:1, x:0, y:0}, base = null;
 
@@ -29,6 +32,8 @@ function prepare(){
     name:p.n, region:p.r, island:p.i, id:String(p.id),
     rings:p.g.map(g=>decode(g).map(c=>merc(c[0],c[1])))
   }));
+  const n = window.STAMPLOGS_NCR;
+  ncr = n ? {name:n.n, rings:n.g.map(g=>decode(g).map(c=>merc(c[0],c[1])))} : null;
 }
 
 function fit(){
@@ -60,6 +65,17 @@ function fit(){
     best.forEach(c=>{ cx += c[0]*base.s + base.tx; cy += base.ty - c[1]*base.s; });
     p.d = d; p.c = [cx/best.length, cy/best.length];
   });
+  /* NCR is laid out on the same transform, but after it — the fit is measured
+     from the 82 alone, so adding the capital moves nothing. */
+  if(ncr){
+    let d = "";
+    ncr.rings.forEach(r=>{
+      d += "M";
+      r.forEach((c,i)=>{ d += (i?"L":"") + (c[0]*base.s + base.tx).toFixed(1) + " " + (base.ty - c[1]*base.s).toFixed(1); });
+      d += "Z";
+    });
+    ncr.d = d;
+  }
 }
 
 function paintProv(p){
@@ -74,6 +90,29 @@ function drawMap(){
   els.svg.textContent = "";
   gRoot = document.createElementNS(NS,"g");
   els.svg.appendChild(gRoot);
+  /* the capital goes down first, so the provinces around it paint over its edge
+     and no seam shows where the boundaries were simplified apart */
+  if(ncr){
+    const defs = document.createElementNS(NS,"defs");
+    ncrPat = document.createElementNS(NS,"pattern");
+    ncrPat.setAttribute("id","ncr-hatch");
+    ncrPat.setAttribute("patternUnits","userSpaceOnUse");
+    ncrPat.setAttribute("patternTransform","rotate(45)");
+    const bg = document.createElementNS(NS,"rect");
+    bg.setAttribute("fill","#DCD7C9");
+    const ln = document.createElementNS(NS,"line");
+    ln.setAttribute("stroke","#B5AF9E");
+    ncrPat.append(bg, ln);
+    defs.appendChild(ncrPat);
+    els.svg.appendChild(defs);
+    ncrEl = document.createElementNS(NS,"path");
+    ncrEl.setAttribute("class","ncr");
+    ncrEl.setAttribute("d", ncr.d);
+    const t = document.createElementNS(NS,"title");
+    t.textContent = "Metro Manila — a region, not one of the 82 provinces";
+    ncrEl.appendChild(t);
+    gRoot.appendChild(ncrEl);
+  }
   provinces.forEach(p=>{
     const el = document.createElementNS(NS,"path");
     el.setAttribute("d", p.d);
@@ -90,12 +129,25 @@ function drawMap(){
 }
 function applyView(){
   gRoot.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");
+  hatchScale();
   drawLead();
+}
+/* the hatch is a texture on the paper, not on the land: hold it at the same size
+   on screen however far the map is zoomed in */
+function hatchScale(){
+  if(!ncrPat) return;
+  const u = 7/view.k;
+  ncrPat.setAttribute("width", u); ncrPat.setAttribute("height", u);
+  const [bg, ln] = ncrPat.children;
+  bg.setAttribute("width", u); bg.setAttribute("height", u);
+  ln.setAttribute("x1",0); ln.setAttribute("y1",0); ln.setAttribute("x2",0); ln.setAttribute("y2",u);
+  ln.setAttribute("stroke-width", 2/view.k);
 }
 function relayout(){
   if(!els.stage.clientWidth || !els.stage.clientHeight) return;
   fit();
   provinces.forEach(p=>p.el.setAttribute("d", p.d));
+  if(ncrEl) ncrEl.setAttribute("d", ncr.d);
   drawLead();
 }
 

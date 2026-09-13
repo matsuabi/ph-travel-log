@@ -1,5 +1,5 @@
 /* App-wide constants: the version, the names, and every storage key in one place. */
-const APP_VERSION = "1.9.0";
+const APP_VERSION = "1.10.0";
 const APP_NAME = "StampLogs";
 const APP_TITLE = "StampLogs";
 const UNDATED = "undated";

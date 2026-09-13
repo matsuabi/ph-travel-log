@@ -284,11 +284,14 @@
       <dd>This map follows the 2023 Philippine Standard Geographic Code list of provinces,
         which is where the figure of 82 comes from.
         <small>The number is not settled. Maguindanao was split into two provinces in 2022,
-        and other splits and mergers are proposed regularly. Metro Manila is not a province
+        and other splits and mergers are proposed regularly. Metro Manila is drawn on the map,
+        hatched, so the capital is not a hole in Luzon — but it is a region, not a province,
         and is not counted here.</small></dd>
 
       <dt>Boundary data</dt>
       <dd>Province boundaries from <b>faeldon/philippines-json-maps</b>, used under the MIT License.
+        The Metro Manila outline is derived from the same data — the gap the 82 provinces leave
+        around the capital, closed along Manila Bay and Laguna de Bay.
         <small>Simplified to roughly one kilometre of detail so the map loads instantly.
         Coastlines are approximate and small islets are omitted.
         <b>Not for navigation, legal, or any official purpose.</b></small></dd>
@@ -314,6 +317,7 @@
 </div>
 
 <script src="provinces.js"></script>
+<script src="ncr.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/dom.js"></script>

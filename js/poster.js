@@ -32,6 +32,24 @@ function poster(){
     "font-size":13,"letter-spacing":2.4,fill:INK2},"PLAN AND STAMP YOUR MAP"));
   svg.appendChild(mk("line",{x1:PAD,y1:HEAD-36,x2:W-PAD,y2:HEAD-36,stroke:RULE,"stroke-width":1}));
 
+  /* the capital, hatched and uncounted, under the provinces that border it */
+  if(typeof ncr !== "undefined" && ncr){
+    const defs = mk("defs");
+    const pat = mk("pattern",{id:"ncr-hatch-poster",width:8,height:8,
+      patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"});
+    pat.appendChild(mk("rect",{width:8,height:8,fill:"#DCD7C9"}));
+    pat.appendChild(mk("line",{x1:0,y1:0,x2:0,y2:8,stroke:"#B5AF9E","stroke-width":2.4}));
+    defs.appendChild(pat);
+    svg.appendChild(defs);
+    let d = "";
+    ncr.rings.forEach(r=>{
+      d += "M";
+      r.forEach((c,i)=>{ d += (i?"L":"") + (c[0]*s + tx).toFixed(1) + " " + (ty - c[1]*s).toFixed(1); });
+      d += "Z";
+    });
+    svg.appendChild(mk("path",{d:d,fill:"url(#ncr-hatch-poster)",stroke:"#C7C2B4","stroke-width":0.8}));
+  }
+
   provinces.forEach(p=>{
     let d = "";
     p.rings.forEach(r=>{

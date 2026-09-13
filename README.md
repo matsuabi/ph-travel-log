@@ -23,6 +23,8 @@ python3 -m http.server 8000
   **Planned** or **Stamped**. Planned and Stamped ask for a date first. Every list
   row carries the same three buttons, and tapping the name opens the province.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
+- **See Metro Manila** on the map, hatched — drawn so Luzon has no hole at the
+  capital, but never stamped, listed or counted, since it is a region, not a province.
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
 - **Search** the list by name.
@@ -53,6 +55,7 @@ log is kept, the count of 82, the boundary data and the terms.
 | `index.html`          | The markup, and the scripts in the order they load                |
 | `css/styles.css`      | All the styles                                                    |
 | `provinces.js`        | Province boundaries, polyline-encoded                             |
+| `ncr.js`              | The Metro Manila outline — drawn, never counted                   |
 | `js/config.js`        | The app version, names and every storage key                      |
 | `js/state.js`         | The log in memory — stamps, dates, nickname — and saving it       |
 | `js/dom.js`           | Shared elements and helpers: toast, download, file names          |
@@ -117,6 +120,16 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.10.0 — 2026-09-13
+
+- Added: **Metro Manila** is drawn on the map and on the saved image, hatched, so
+  the capital is no longer a hole in Luzon. It is a region, not a province, so it
+  can't be tapped, stamped, listed or counted — the tally stays at 82.
+- Added: the hatch holds the same size on screen at any zoom.
+- Changed: About explains the Metro Manila outline and where it comes from.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.9.0 — 2026-09-13
 
