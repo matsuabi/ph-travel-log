@@ -1,0 +1,503 @@
+:root{
+  --paper:#F2EFE7; --panel:#FBFAF6; --ink:#1B1D1A; --ink-2:#6E7169;
+  --rule:#DAD6CA; --rule-2:#E9E5DB;
+  --visited:#1B6B57; --clay:#B0674A; --unvisited:#E4E0D5;
+  --planned:#E4A97D; --planned-line:#C2814F;
+  --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+}
+a{color:var(--visited);text-decoration:none;border-bottom:1px solid var(--rule)}
+a:hover{color:var(--clay);border-bottom-color:currentColor}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100%}
+
+header{
+  display:flex;align-items:baseline;gap:14px;
+  padding:16px 24px 14px;border-bottom:1px solid var(--rule);background:var(--panel);
+  padding-top:max(16px, env(safe-area-inset-top));
+}
+.wordmark{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.wordmark h1{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.005em;margin:0}
+.wordmark span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+header .spacer{flex:1}
+.tools{display:flex;gap:6px;align-self:center;flex-wrap:wrap}
+#tools-toggle{display:none}
+#tools-scrim{display:none;position:fixed;left:0;right:0;top:65px;bottom:0;background:rgba(27,29,26,.34);z-index:6}
+.tools[hidden],#tools-scrim[hidden]{display:none}
+.ghost{
+  font:500 12px/1 var(--sans);padding:11px 13px;border:1px solid var(--rule);
+  border-radius:2px;background:transparent;color:var(--ink-2);cursor:pointer;min-height:38px;
+}
+.ghost:hover{color:var(--clay);border-color:var(--clay)}
+
+.scrim{
+  position:fixed;inset:0;background:rgba(27,29,26,.34);z-index:30;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.scrim[hidden]{display:none}
+.sheet{
+  background:var(--panel);border:1px solid var(--rule);border-radius:2px;
+  width:min(460px,100%);max-height:calc(100% - 24px);overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.sheet header{border-bottom:1px solid var(--rule);padding:18px 24px 15px;align-items:center}
+.sheet h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.005em}
+.sheet .x{
+  margin-left:auto;border:0;background:none;font-size:20px;line-height:1;color:var(--ink-2);
+  cursor:pointer;padding:4px 2px;min-height:38px;min-width:38px;
+}
+.sheet .x:hover{color:var(--clay)}
+.sheet dl{margin:0;padding:6px 24px 22px}
+.sheet dt{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
+  padding:18px 0 6px;
+}
+.sheet dd{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink);text-wrap:pretty}
+.sheet dd + dd{margin-top:7px}
+.sheet dd small{display:block;margin-top:5px;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.sheet .sig{
+  border-top:1px solid var(--rule);padding:16px 24px;display:flex;gap:10px;
+  align-items:baseline;font-size:12px;color:var(--ink-2);
+}
+.sheet .sig b{font-weight:600;color:var(--ink);font-size:12.5px}
+.sheet .sig .spacer{flex:1}
+.sheet .sig #ver{font-size:11.5px;color:#A9A79D;letter-spacing:.04em}
+
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--paper);padding:10px 15px;border-radius:2px;
+  font-size:12.5px;opacity:0;pointer-events:none;
+  transition:opacity .18s,transform .18s;z-index:20;max-width:calc(100% - 32px);text-align:center;
+}
+#toast.up{opacity:1;transform:translate(-50%,0)}
+
+main{display:grid;grid-template-columns:1fr 372px;min-height:0}
+.stage{position:relative;min-width:0;overflow:hidden}
+#svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
+.prov{transition:fill .4s ease;stroke:#C7C2B4;stroke-width:.7px;vector-effect:non-scaling-stroke}
+.prov.on{fill:var(--visited)}
+.prov.plan{fill:var(--planned)}   /* dated ahead, not stamped yet */
+.prov.off{fill:var(--unvisited)}
+.prov.hot{stroke:var(--ink);stroke-width:1.4px}
+.burst{fill:none;stroke:var(--visited);vector-effect:non-scaling-stroke}
+
+.readout{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;pointer-events:none;padding:14px 16px 0}
+.readout b{
+  background:var(--ink);color:var(--paper);padding:7px 12px;border-radius:2px;
+  font-size:12.5px;font-weight:500;opacity:0;transition:opacity .15s;
+  display:flex;gap:9px;align-items:baseline;max-width:100%;
+}
+.readout b em{font-style:normal;color:#A7ADA4;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase}
+
+.hud{position:absolute;left:18px;bottom:16px;display:flex;flex-direction:column;gap:9px}
+.hud .hint{font-size:11.5px;color:var(--ink-2);max-width:240px;text-wrap:pretty;pointer-events:none}
+.zoom{display:flex;gap:6px}
+.zoom button{
+  width:40px;height:40px;border:1px solid var(--rule);background:var(--panel);
+  color:var(--ink);cursor:pointer;border-radius:2px;font-size:16px;line-height:1;
+  display:grid;place-content:center;
+}
+.zoom button:hover{border-color:var(--clay);color:var(--clay)}
+.zoom .wide{width:auto;padding:0 13px;font-size:11px;letter-spacing:.06em}
+
+aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+.tally{padding:24px 24px 20px;border-bottom:1px solid var(--rule)}
+.tally .big{display:flex;align-items:baseline;gap:8px}
+.tally .big b{font-family:var(--serif);font-size:60px;font-weight:600;letter-spacing:-.01em;line-height:.9}
+.tally .big i{font-family:var(--serif);font-style:normal;font-size:19px;color:var(--ink-2)}
+.tally .cap{margin-top:9px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.meter{margin-top:14px;height:3px;background:var(--rule-2);position:relative}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--visited);transition:width .5s ease}
+.nickrow{display:flex;align-items:baseline;gap:10px;margin-top:14px}
+.nickrow span{
+  flex:none;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
+}
+.nick{
+  flex:1;min-width:0;border:0;border-bottom:1px solid transparent;background:transparent;
+  font:400 12.5px var(--sans);color:var(--ink);
+  outline:none;padding:4px 0;min-height:28px;text-overflow:ellipsis;
+}
+.nick::placeholder{color:#BFBCB1}
+.nick:hover{border-bottom-color:var(--rule)}
+.nick:focus{border-bottom-color:var(--clay);color:var(--ink)}
+
+/* ── province callout: the photo sits on the map, tied to the province ── */
+/* the frame owns the height and the photo is fitted inside it, so a tall
+   photo can never run past the frame and over the controls below */
+#prov-slot{display:flex;flex-direction:column;min-height:72px}
+.photoframe{
+  flex:1 1 auto;width:100%;aspect-ratio:4/3;min-height:72px;max-height:420px;
+  overflow:hidden;background:var(--unvisited);border-radius:2px;
+}
+.photo{
+  display:block;width:100%;height:100%;object-fit:contain;
+}
+.lead{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.lead[hidden]{display:none}
+.callout{
+  position:absolute;top:54px;right:18px;width:320px;z-index:5;
+  background:var(--panel);border:1px solid var(--ink);border-radius:2px;
+  display:flex;flex-direction:column;max-height:calc(100% - 108px);
+  box-shadow:0 10px 30px rgba(27,29,26,.12);
+}
+.callout[hidden]{display:none}
+.callout header{border-bottom:1px solid var(--rule);padding:14px 16px 12px;align-items:baseline;gap:9px}
+.callout h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.005em}
+.callout header .rg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+.callout .grip{display:none;justify-content:center;padding:8px 0 0;flex:none}
+.callout .grip span{width:44px;height:4px;border-radius:2px;background:var(--rule);display:block}
+.callout .x{
+  margin-left:auto;border:0;background:none;font-size:20px;line-height:1;
+  color:var(--ink-2);cursor:pointer;padding:0 2px;height:24px;
+}
+.callout .x:hover{color:var(--clay)}
+.callout .pbody{
+  padding:14px 16px 6px;display:flex;flex-direction:column;gap:12px;
+  overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;
+}
+/* only the photo gives way when the panel is short; the rest keeps its size */
+.callout .pbody > *{flex:0 0 auto}
+.callout .pbody > #prov-slot{flex:0 1 auto}
+/* status, then the date it sits on — both held above the scrolling body */
+.callout .pfixed{
+  flex:none;padding:11px 16px;display:flex;flex-direction:column;gap:9px;
+  border-bottom:1px solid var(--rule-2);
+}
+.seg3{
+  display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;
+  border:1px solid var(--rule);border-radius:2px;overflow:hidden;
+}
+.seg3 button{
+  font:500 10px/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase;
+  padding:13px 4px;min-height:42px;border:0;background:transparent;color:var(--ink-2);
+  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.seg3 button + button{border-left:1px solid var(--rule)}
+.seg3 button:hover{color:var(--clay)}
+.seg3 button[data-kind="none"][aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg3 button[data-kind="planned"][aria-pressed="true"]{background:var(--planned);color:var(--ink)}
+.seg3 button[data-kind="traveled"][aria-pressed="true"]{background:var(--visited);color:var(--panel)}
+.seg3 button[aria-pressed="true"]:hover{color:inherit}
+
+/* the trip: a date, and whether it has happened yet */
+.callout .trip{display:flex;align-items:center;gap:9px}
+.trip .fld{flex:1;min-width:0;display:flex}
+.trip .date{
+  width:100%;min-width:0;font:500 13px/1 var(--sans);color:var(--ink);
+  background:transparent;border:1px solid var(--rule);border-radius:2px;
+  padding:9px 10px;min-height:36px;
+}
+.trip .date:hover{border-color:var(--clay)}
+.trip .date:focus{outline:none;border-color:var(--clay)}
+.trip .tag{
+  flex:none;font-style:normal;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:#A9A79D;
+}
+.callout .note{font-size:11.5px;color:var(--ink-2);line-height:1.45}
+.callout .note[hidden]{display:none}
+.callout .empty{
+  border:0;border-radius:0;padding:14px 0;text-align:left;
+  font-size:12.5px;line-height:1.5;color:#A9A79D;
+}
+/* the photo's one control sits under it, not in a bar of its own */
+.callout .photoact{display:flex;margin-top:-2px;padding-bottom:4px}
+.photoact[hidden]{display:none}
+.photoact > *{flex:1;justify-content:center;text-align:center}
+.photoact .danger:hover{color:#A8412A;border-color:#A8412A}
+.empty{
+  border:1px dashed var(--rule);border-radius:2px;padding:30px 20px;text-align:center;
+  color:var(--ink-2);font-size:13px;line-height:1.5;
+}
+.acts{
+  border-top:1px solid var(--rule);padding:14px 24px;display:flex;gap:8px;flex-wrap:wrap;
+}
+.acts .grow{flex:1}
+.acts .danger:hover{color:#A8412A;border-color:#A8412A}
+.filelabel{
+  font:500 12px/1 var(--sans);padding:11px 13px;border:1px solid var(--rule);
+  border-radius:2px;background:transparent;color:var(--ink-2);cursor:pointer;
+  min-height:38px;display:inline-flex;align-items:center;
+}
+.filelabel:hover{color:var(--clay);border-color:var(--clay)}
+.filelabel[hidden]{display:none}
+.trip[hidden]{display:none}
+.filelabel input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.busy{font-size:12px;color:var(--ink-2)}
+
+/* ── clear dialog ── */
+.opts{padding:8px 24px 4px;display:flex;flex-direction:column;gap:2px}
+.opt{
+  display:flex;gap:11px;align-items:flex-start;padding:12px 0;cursor:pointer;
+  border-bottom:1px solid var(--rule-2);
+}
+.opt:last-child{border-bottom:0}
+.opt[hidden]{display:none}
+.opt input{margin:2px 0 0;width:15px;height:15px;accent-color:var(--visited);flex:none}
+.opt .t{font-size:13.5px;line-height:1.4}
+.opt .t small{display:block;margin-top:3px;font-size:11.5px;color:var(--ink-2)}
+
+.row .nm{display:flex;align-items:center}
+.row[data-photo="1"] .nm::after{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--clay);
+  margin-left:8px;flex:none;
+}
+.readout b i{
+  font-style:normal;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--paper);border:1px solid #55605A;border-radius:2px;padding:2px 5px;
+}
+
+.islands{padding:18px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:13px}
+.isl{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:baseline}
+.isl .nm{font-size:12.5px;font-weight:500}
+.isl .ct{font-size:11.5px;color:var(--ink-2)}
+.isl .bar{grid-column:1/-1;height:2px;background:var(--rule-2);position:relative}
+.isl .bar i{position:absolute;inset:0 auto 0 0;background:var(--ink);transition:width .5s ease}
+
+.planrow{
+  display:flex;gap:11px;align-items:flex-start;cursor:pointer;
+  padding:14px 24px;border-bottom:1px solid var(--rule);
+}
+.planrow input{
+  -webkit-appearance:none;appearance:none;margin:1px 0 0;width:16px;height:16px;flex:none;
+  border:1px solid var(--rule);border-radius:1px;position:relative;background:#fff;cursor:pointer;
+}
+.planrow input:checked{background:var(--planned-line);border-color:var(--planned-line)}
+.planrow input:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.planrow .t{font-size:12.5px;line-height:1.4}
+.planrow .t small{display:block;margin-top:3px;font-size:11px;color:var(--ink-2)}
+.planrow:hover .t{color:var(--clay)}
+
+.listtoggle{display:none}
+.listhead{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.listhead input{
+  flex:1;min-width:130px;border:0;background:transparent;font:400 15px var(--sans);color:var(--ink);
+  outline:none;padding:6px 0;min-height:34px;
+}
+.listhead input::placeholder{color:#A9A79D}
+.listhead .n{font-size:11px;color:var(--ink-2);letter-spacing:.08em}
+.seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;margin-left:auto}
+.seg button{
+  font:500 10px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;
+  padding:10px 11px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;
+  min-height:34px;-webkit-tap-highlight-color:transparent;
+}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button:hover{color:var(--clay)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.list{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+.grp{padding:16px 24px 5px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+/* a row: the name opens the panel, and the three buttons beside it set the status */
+.row{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+  padding:0 24px;min-height:52px;border-bottom:1px solid var(--rule-2);
+}
+.row:hover{background:#F4F1E9}
+.row .open{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;
+  padding:8px 0;border:0;background:none;text-align:left;font:inherit;color:inherit;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.row .open:hover .nm{color:var(--clay)}
+.row .open:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+/* the check: an L of two borders, turned 45° — used by the planned toggle */
+.planrow input:checked::after{
+  content:"";position:absolute;left:4.5px;top:1px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.row .nm{font-size:14px;line-height:1.25}
+.row[data-on="1"] .nm{color:var(--ink-2)}
+.row .rg{font-size:10.5px;color:#A9A79D}
+.rseg{
+  display:grid;grid-template-columns:repeat(3,58px);
+  border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:#fff;
+}
+.rseg button{
+  font:500 9px/1.15 var(--sans);letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 3px;min-height:36px;border:0;background:transparent;color:var(--ink-2);
+  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.rseg button + button{border-left:1px solid var(--rule)}
+.rseg button:hover{color:var(--clay)}
+.rseg button:focus-visible{outline:2px solid var(--clay);outline-offset:-2px}
+.rseg button[data-kind="none"][aria-pressed="true"]{background:var(--unvisited);color:var(--ink)}
+.rseg button[data-kind="planned"][aria-pressed="true"]{background:var(--planned);color:var(--ink)}
+.rseg button[data-kind="traveled"][aria-pressed="true"]{background:var(--visited);color:var(--panel)}
+.rseg button[aria-pressed="true"]:hover{color:inherit}
+
+/* ── photos view: the same log read as a contact sheet ── */
+.viewbar{
+  display:flex;align-items:center;gap:14px;padding:10px 24px 11px;
+  border-bottom:1px solid var(--rule);background:var(--panel);
+}
+.viewbar .seg{margin-left:0}
+.viewbar .tallyline{margin-left:auto;display:flex;align-items:baseline;gap:7px}
+.viewbar .tallyline b{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1}
+.viewbar .tallyline span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+main,.photos{grid-row:3}
+.photos{display:none;flex-direction:column;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+body[data-view="photos"] .photos{display:flex}
+body[data-view="photos"] main{display:none}
+.sortbar{
+  display:flex;align-items:center;gap:10px;padding:11px 24px;flex:none;
+  border-bottom:1px solid var(--rule);background:var(--panel);
+}
+.sortbar > span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#A9A79D}
+.pgrp{
+  position:sticky;top:0;z-index:2;background:var(--paper);
+  border-bottom:1px solid var(--rule-2);padding:11px 24px;
+  display:flex;gap:10px;align-items:baseline;
+}
+.pgrp b{font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+.pgrp span{font-size:11px;color:#A9A79D}
+.psheet{padding:14px 24px 22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 12px}
+.ptile{
+  display:flex;flex-direction:column;gap:6px;border:0;padding:0;background:none;
+  font:inherit;color:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.ptile .th{aspect-ratio:1;border:1px solid var(--rule);background:var(--unvisited);overflow:hidden}
+.ptile img{display:block;width:100%;height:100%;object-fit:cover}
+.ptile .nm{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.ptile:hover .th{border-color:var(--clay)}
+.ptile:hover .nm{color:var(--clay)}
+.pempty{padding:44px 24px;text-align:center;font-size:13px;line-height:1.55;color:var(--ink-2)}
+.pempty b{display:block;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:7px}
+
+/* ── one photo on its own: the sheet read one frame at a time ── */
+.viewer{
+  position:fixed;inset:0;z-index:40;background:var(--paper);
+  display:flex;flex-direction:column;
+}
+.viewer[hidden]{display:none}
+.viewer .vhead{
+  display:flex;align-items:center;gap:12px;flex:none;
+  padding:14px 24px 13px;border-bottom:1px solid var(--rule);background:var(--panel);
+  padding-top:max(14px, env(safe-area-inset-top));
+}
+.viewer .vhead .n{font-size:12px;letter-spacing:.12em;color:var(--ink-2)}
+.viewer .vhead .x{
+  margin-left:auto;border:1px solid var(--rule);border-radius:2px;background:transparent;
+  width:40px;height:40px;display:grid;place-content:center;
+  font-size:22px;line-height:1;color:var(--ink);cursor:pointer;
+}
+.viewer .vhead .x:hover{color:var(--clay);border-color:var(--clay)}
+.vstage{
+  flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+  padding:20px 18px;overflow:hidden;touch-action:pan-y;
+}
+/* fitted to the width it is given, and never taller than the stage, so the
+   frame sits on the photo itself rather than on an empty band around it */
+.vstage img{
+  display:block;width:auto;max-width:100%;max-height:100%;
+  border:1px solid var(--rule);background:var(--unvisited);
+  transition:opacity .14s ease;
+}
+.vfoot{
+  flex:none;border-top:1px solid var(--rule);background:var(--panel);
+  padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding-bottom:max(14px, env(safe-area-inset-bottom));
+}
+.vfoot .vmeta{display:flex;flex-direction:column;gap:5px;min-width:0}
+.vfoot .vmeta b{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.005em}
+.vfoot .vmeta span{font-size:12.5px;color:var(--ink-2)}
+.vfoot .vrg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+.vfoot .ghost{margin-left:auto;min-height:44px}
+.vdots{display:flex;gap:5px;align-items:center;flex:none}
+.vdots i{width:5px;height:5px;border-radius:50%;background:var(--rule);display:block}
+.vdots i.on{background:var(--ink)}
+
+@media (max-width:1000px){
+  .app{height:auto;min-height:100%}
+  main{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .stage{height:52vh;min-height:320px}
+  aside{border-left:0;border-top:1px solid var(--rule)}
+  .list{overflow:visible;flex:none}
+  .hud .hint{display:none}
+}
+@media (max-width:600px){
+  header{padding:14px 18px 12px;gap:10px;flex-wrap:wrap}
+  header .spacer{display:none}
+  .wordmark h1{font-size:17px}
+  .wordmark span{display:none}
+  #tools-toggle{display:flex;margin-left:auto}
+  .tools{
+    position:absolute;right:18px;top:64px;width:198px;z-index:7;
+    flex-direction:column;flex-wrap:nowrap;gap:0;width:198px;
+    background:var(--panel);border:1px solid var(--ink);border-radius:2px;
+    box-shadow:0 10px 30px rgba(27,29,26,.16);
+  }
+  .tools .ghost{
+    border:0;border-bottom:1px solid var(--rule);border-radius:0;
+    justify-content:flex-start;min-height:46px;padding:0 15px;
+    font:400 13.5px/1 var(--sans);
+  }
+  .tools .ghost:last-child{border-bottom:0}
+  #tools-scrim{display:block}
+  /* the panel is the thing being used on a phone: give it room, and keep
+     everything in it reachable without a scroll inside a scroll */
+  /* the panel is a sheet on the bottom edge of the map: full width, a fixed
+     height, and only the photo area inside it scrolls */
+  .callout{
+    top:auto;left:0;right:0;bottom:0;width:auto;
+    height:min(360px,66%);max-height:none;
+    border-left:0;border-right:0;border-bottom:0;border-radius:0;
+    box-shadow:0 -12px 34px rgba(27,29,26,.16);
+  }
+  .callout .grip{display:flex}
+  .callout header{padding:9px 16px 10px}
+  .callout h2{font-size:17px}
+  .callout .x{font-size:26px;height:32px;padding:0 6px;margin-right:-4px}
+  .callout .pbody{padding:12px 16px 16px;gap:11px}
+  .callout .pfixed{padding:11px 16px}
+  .trip .date{min-height:46px;padding:13px 11px;font-size:14px}
+  .seg3 button{min-height:46px;padding:15px 4px}
+  .callout .empty{padding:14px 0;font-size:12.5px;line-height:1.5}
+  .callout .photoact > *{min-height:46px;white-space:nowrap}
+  /* on a phone the frame gives way first, so the controls stay in reach */
+  .callout .photoframe{aspect-ratio:3/2;max-height:46vh}
+
+  /* the list folds away, so the map and the panel get the screen */
+  .listtoggle{
+    display:flex;align-items:center;gap:10px;width:100%;
+    padding:0 18px;min-height:54px;border:0;border-bottom:1px solid var(--rule);
+    background:var(--panel);font:500 13px/1 var(--sans);color:var(--ink);
+    text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .listtoggle em{font-style:normal;font-size:11.5px;color:var(--ink-2);margin-left:auto}
+  .listtoggle i{font-style:normal;font-size:10px;color:var(--ink-2)}
+  aside[data-list="off"] .listtoggle{border-bottom:0}
+  aside[data-list="off"] .listhead,aside[data-list="off"] .list{display:none}
+  main:has(aside[data-list="off"]) .stage{height:74vh}
+  .sheet dl{padding:4px 18px 20px}
+  .sheet header{padding:16px 18px 13px}
+  .sheet .sig{padding:14px 18px}
+  .stage{height:62vh;min-height:430px}
+  /* the zoom buttons ride above the open sheet */
+  .hud{left:14px;bottom:calc(var(--sheet-h, 0px) + 14px)}
+  .tally{padding:20px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
+  .tally .big{grid-row:1/3}
+  .tally .big b{font-size:46px}
+  .tally .cap{margin-top:0;align-self:end}
+  .meter{grid-column:2;margin-top:8px;align-self:start}
+  .nickrow{grid-column:1/-1;margin-top:8px}
+  .islands{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .planrow{padding:13px 18px}
+  .listhead{padding:10px 18px}
+  .seg button{padding:10px 9px}
+  .grp{padding:14px 18px 5px}
+  .row{padding:0 18px;min-height:52px}
+  .viewbar,.sortbar{padding-left:18px;padding-right:18px}
+  .pgrp{padding:10px 18px}
+  .psheet{padding:13px 18px 20px;grid-template-columns:1fr 1fr 1fr}
+  .pempty{padding:34px 18px}
+  .viewer .vhead{padding-left:18px;padding-right:18px}
+  .vfoot{padding-left:18px;padding-right:18px}
+  .vstage{padding:16px 14px}
+}

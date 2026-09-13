@@ -8,8 +8,8 @@ No account, no server, no analytics. Your log lives in your own browser.
 
 ## Running it
 
-Open `index.html` in a browser. That's the whole thing — two files, no build step,
-no dependencies, no network calls.
+Open `index.html` in a browser. That's the whole thing — plain HTML, CSS and
+script files, no build step, no dependencies, no network calls.
 
 To serve it locally:
 
@@ -20,8 +20,8 @@ python3 -m http.server 8000
 ## What it does
 
 - **Stamp provinces** by tapping one on the map and setting it **Not visited**,
-  **Planned** or **Stamped**. Planned and Stamped ask for a date first. List rows
-  toggle a dated province straight away.
+  **Planned** or **Stamped**. Planned and Stamped ask for a date first. Every list
+  row carries the same three buttons, and tapping the name opens the province.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
@@ -48,11 +48,32 @@ log is kept, the count of 82, the boundary data and the terms.
 
 ## Files
 
-| File            | What it is                                            |
-| --------------- | ----------------------------------------------------- |
-| `index.html`    | The whole app — markup, styles and script in one file |
-| `provinces.js`  | Province boundaries, polyline-encoded                  |
-| `LICENSE`       | MIT                                                    |
+| File                  | What it is                                                        |
+| --------------------- | ----------------------------------------------------------------- |
+| `index.html`          | The markup, and the scripts in the order they load                |
+| `css/styles.css`      | All the styles                                                    |
+| `provinces.js`        | Province boundaries, polyline-encoded                             |
+| `js/config.js`        | The app version, names and every storage key                      |
+| `js/state.js`         | The log in memory — stamps, dates, nickname — and saving it       |
+| `js/dom.js`           | Shared elements and helpers: toast, download, file names          |
+| `js/map.js`           | Decoding and fitting the map, drawing, stamping, pan and zoom     |
+| `js/sidebar.js`       | The tally, nickname, planned switch and province list             |
+| `js/photo-store.js`   | Photos in IndexedDB, and shrinking them on the way in             |
+| `js/panel.js`         | The province panel: status, date, photo and the lead line         |
+| `js/poster.js`        | **Save image**                                                    |
+| `js/zip.js`           | A small ZIP writer and reader                                     |
+| `js/log-file.js`      | **Save file** and **Load file**                                   |
+| `js/dialogs.js`       | Clear, How to use, About, Escape, and the phone tools menu        |
+| `js/photos-view.js`   | The Photos contact sheet and the full-screen viewer               |
+| `js/main.js`          | Starts the app — loads last                                       |
+| `LICENSE`             | MIT                                                               |
+
+The scripts are plain `<script>` tags rather than ES modules, so the page still
+works opened straight from disk (`file://`), where browsers refuse to load modules.
+They share one global scope and load in the order listed in `index.html`: each file
+only declares things and wires up its own controls, and `js/main.js` runs last to
+start the app. Keep new start-up code in `main.js`, and keep `config.js` and
+`state.js` ahead of everything that uses them.
 
 ## Where the data lives
 
@@ -84,8 +105,7 @@ to a web address, or between domains. Use **Save file** to move one.
 
 ## Versioning
 
-The app version lives in one place, `APP_VERSION` near the top of the script in
-`index.html`. It shows in the About sheet and is written into every saved JSON
+The app version lives in one place, `APP_VERSION` at the top of `js/config.js`. It shows in the About sheet and is written into every saved JSON
 file as `appVersion`.
 
 [Semantic versioning](https://semver.org): patch for fixes, minor for features,
@@ -97,6 +117,18 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.9.0 — 2026-09-13
+
+- Added: **Not visited / Planned / Stamped** buttons on every list row. A dated
+  province changes on the spot; one with no date opens its panel to ask for the day.
+- Changed: tapping a province's name in the list opens its panel.
+- Changed: a clearer check on the **Show planned provinces** switch.
+- Changed: the app is split into `index.html`, `css/styles.css` and `js/` files.
+- Fixed: the date picker could open at the top-left corner of the page.
+- Fixed: a glitch in the first frame of the stamp ripple.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.8.0 — 2026-09-13
 
