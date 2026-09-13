@@ -19,8 +19,9 @@ python3 -m http.server 8000
 
 ## What it does
 
-- **Stamp provinces** by tapping one on the map, dating the day you went, then
-  setting it **Stamped**. List rows toggle a dated province straight away.
+- **Stamp provinces** by tapping one on the map and setting it **Not visited**,
+  **Planned** or **Stamped**. Planned and Stamped ask for a date first. List rows
+  toggle a dated province straight away.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
@@ -96,6 +97,19 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.8.0 — 2026-09-13
+
+- Added: a three-way **Not visited / Planned / Stamped** control in the province
+  panel. Not visited clears the stamp and the date, and keeps the photo for when
+  you stamp it again.
+- Changed: the status and date stay at the top of the panel, and the date shows
+  whether you're *going* or *went*.
+- Changed: on phones the panel is a full-width sheet at the bottom of the map,
+  and the zoom buttons sit above it.
+- Added: **Replace** for a province's photo.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.7.0 — 2026-09-12
 

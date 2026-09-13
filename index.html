@@ -156,8 +156,11 @@
     box-shadow:0 10px 30px rgba(27,29,26,.12);
   }
   .callout[hidden]{display:none}
-  .callout header{border-bottom:1px solid var(--rule);padding:14px 16px 12px;align-items:center}
+  .callout header{border-bottom:1px solid var(--rule);padding:14px 16px 12px;align-items:baseline;gap:9px}
   .callout h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.005em}
+  .callout header .rg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
+  .callout .grip{display:none;justify-content:center;padding:8px 0 0;flex:none}
+  .callout .grip span{width:44px;height:4px;border-radius:2px;background:var(--rule);display:block}
   .callout .x{
     margin-left:auto;border:0;background:none;font-size:20px;line-height:1;
     color:var(--ink-2);cursor:pointer;padding:0 2px;height:24px;
@@ -170,30 +173,47 @@
   /* only the photo gives way when the panel is short; the rest keeps its size */
   .callout .pbody > *{flex:0 0 auto}
   .callout .pbody > #prov-slot{flex:0 1 auto}
-  .callout .meta{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-  .callout .meta .rg{
-    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
+  /* status, then the date it sits on — both held above the scrolling body */
+  .callout .pfixed{
+    flex:none;padding:11px 16px;display:flex;flex-direction:column;gap:9px;
+    border-bottom:1px solid var(--rule-2);
   }
-  .callout .meta .st{font-size:12px;color:var(--ink-2)}
+  .seg3{
+    display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;
+    border:1px solid var(--rule);border-radius:2px;overflow:hidden;
+  }
+  .seg3 button{
+    font:500 10px/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase;
+    padding:13px 4px;min-height:42px;border:0;background:transparent;color:var(--ink-2);
+    text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .seg3 button + button{border-left:1px solid var(--rule)}
+  .seg3 button:hover{color:var(--clay)}
+  .seg3 button[data-kind="none"][aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .seg3 button[data-kind="planned"][aria-pressed="true"]{background:var(--planned);color:var(--ink)}
+  .seg3 button[data-kind="traveled"][aria-pressed="true"]{background:var(--visited);color:var(--panel)}
+  .seg3 button[aria-pressed="true"]:hover{color:inherit}
 
   /* the trip: a date, and whether it has happened yet */
-  .callout .trip{display:flex;flex-direction:column;gap:9px}
-  .trip .fld{display:flex;align-items:center;gap:11px}
-  .trip .fld > span{
-    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;flex:none;
-  }
+  .callout .trip{display:flex;align-items:center;gap:9px}
+  .trip .fld{flex:1;min-width:0;display:flex}
   .trip .date{
-    flex:1;min-width:0;font:500 13px/1 var(--sans);color:var(--ink);
+    width:100%;min-width:0;font:500 13px/1 var(--sans);color:var(--ink);
     background:transparent;border:1px solid var(--rule);border-radius:2px;
     padding:9px 10px;min-height:36px;
   }
   .trip .date:hover{border-color:var(--clay)}
   .trip .date:focus{outline:none;border-color:var(--clay)}
-  .trip .seg{margin-left:0}
-  .trip .seg button{flex:1}
-  .trip .seg[data-set="0"] button[aria-pressed="true"]{background:var(--rule-2);color:var(--ink-2)}
-  .trip .note{font-size:11.5px;color:var(--ink-2);line-height:1.45}
-  .callout .empty{padding:26px 18px;font-size:12.5px}
+  .trip .tag{
+    flex:none;font-style:normal;font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:#A9A79D;
+  }
+  .callout .note{font-size:11.5px;color:var(--ink-2);line-height:1.45}
+  .callout .note[hidden]{display:none}
+  .callout .empty{
+    border:0;border-radius:0;padding:14px 0;text-align:left;
+    font-size:12.5px;line-height:1.5;color:#A9A79D;
+  }
   /* the photo's one control sits under it, not in a bar of its own */
   .callout .photoact{display:flex;margin-top:-2px;padding-bottom:4px}
   .photoact[hidden]{display:none}
@@ -404,23 +424,23 @@
     #tools-scrim{display:block}
     /* the panel is the thing being used on a phone: give it room, and keep
        everything in it reachable without a scroll inside a scroll */
+    /* the panel is a sheet on the bottom edge of the map: full width, a fixed
+       height, and only the photo area inside it scrolls */
     .callout{
-      top:auto;left:10px;right:10px;bottom:10px;width:auto;
-      height:auto;max-height:calc(100% - 190px);
+      top:auto;left:0;right:0;bottom:0;width:auto;
+      height:min(360px,66%);max-height:none;
+      border-left:0;border-right:0;border-bottom:0;border-radius:0;
+      box-shadow:0 -12px 34px rgba(27,29,26,.16);
     }
-    .callout header{padding:13px 15px 12px}
+    .callout .grip{display:flex}
+    .callout header{padding:9px 16px 10px}
     .callout h2{font-size:17px}
     .callout .x{font-size:26px;height:32px;padding:0 6px;margin-right:-4px}
-    .callout .pbody{padding:13px 15px 4px;gap:12px}
-    .callout .meta{gap:8px}
-    .trip .date{min-height:44px;padding:11px 12px;font-size:14px}
-    .trip .seg button{min-height:40px;padding:12px 10px}
-    .callout .trip{flex-direction:row;align-items:center;gap:8px}
-    .callout .trip .fld{flex:1;min-width:0}
-    .callout .trip .fld > span{display:none}
-    .callout .trip .seg{flex:none;margin-left:0}
-    .callout .empty{padding:13px 14px;text-align:left;font-size:12px;line-height:1.45}
-    .callout .note{display:none}
+    .callout .pbody{padding:12px 16px 16px;gap:11px}
+    .callout .pfixed{padding:11px 16px}
+    .trip .date{min-height:46px;padding:13px 11px;font-size:14px}
+    .seg3 button{min-height:46px;padding:15px 4px}
+    .callout .empty{padding:14px 0;font-size:12.5px;line-height:1.5}
     .callout .photoact > *{min-height:46px;white-space:nowrap}
     /* on a phone the frame gives way first, so the controls stay in reach */
     .callout .photoframe{aspect-ratio:3/2;max-height:46vh}
@@ -441,7 +461,8 @@
     .sheet header{padding:16px 18px 13px}
     .sheet .sig{padding:14px 18px}
     .stage{height:62vh;min-height:430px}
-    .hud{left:14px;bottom:12px}
+    /* the zoom buttons ride above the open sheet */
+    .hud{left:14px;bottom:calc(var(--sheet-h, 0px) + 14px)}
     .tally{padding:20px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
     .tally .big{grid-row:1/3}
     .tally .big b{font-size:46px}
@@ -511,24 +532,28 @@
         <circle id="lead-dot" r="2.5" fill="#1B1D1A"></circle>
       </svg>
       <div class="callout" id="provbox" role="dialog" aria-labelledby="prov-h" hidden>
+        <div class="grip" aria-hidden="true"><span></span></div>
         <header>
           <h2 id="prov-h">Province</h2>
+          <span class="rg" id="prov-rg"></span>
           <button class="x" id="prov-close" aria-label="Close">&times;</button>
         </header>
-        <div class="pbody">
-          <div class="meta"><span class="rg" id="prov-rg"></span><span class="st" id="prov-st"></span></div>
-          <div class="trip" id="prov-trip">
-            <label class="fld" for="prov-date"><span>Date</span>
-              <input type="date" id="prov-date" class="date"></label>
-            <div class="seg" id="prov-kind" data-set="0" role="group" aria-label="What this date is">
-              <button type="button" data-kind="traveled" aria-pressed="true">Stamped</button>
-              <button type="button" data-kind="planned" aria-pressed="false">Planned</button>
-            </div>
-            <div class="note" id="prov-kind-note"></div>
+        <div class="pfixed">
+          <div class="seg3" id="prov-kind" role="group" aria-label="Whether you have been">
+            <button type="button" data-kind="none" aria-pressed="true">Not visited</button>
+            <button type="button" data-kind="planned" aria-pressed="false">Planned</button>
+            <button type="button" data-kind="traveled" aria-pressed="false">Stamped</button>
           </div>
+          <div class="trip" id="prov-trip">
+            <label class="fld" for="prov-date"><input type="date" id="prov-date" class="date"></label>
+            <em class="tag" id="prov-tag"></em>
+          </div>
+          <div class="note" id="prov-kind-note" hidden></div>
+        </div>
+        <div class="pbody">
           <div id="prov-slot"></div>
           <div class="photoact" id="prov-photoact">
-            <label class="filelabel" id="prov-add">Add photo
+            <label class="filelabel" id="prov-add"><span id="prov-addtxt">Add photo</span>
               <input type="file" id="prov-file" accept="image/*"></label>
             <button class="ghost danger" id="prov-rmphoto" hidden>Remove photo</button>
           </div>
@@ -658,6 +683,13 @@
         goes back to being called StampLogs.</small></dd>
 
       <dt>Dates</dt>
+      <dd><b>Set where a province stands</b> in the panel that opens when you tap it:
+        <b>Not visited</b>, <b>Planned</b> or <b>Stamped</b>. Planned and stamped both sit on a
+        date, so an empty date is asked for before either goes on, and the date field carries a
+        <i>going</i> or <i>went</i> mark to say which it is. <b>Not visited</b> clears the province
+        and its date again.
+        <small>Any photo you added is kept while a province is not visited, and comes back when you
+        stamp it again.</small></dd>
       <dd><b>Date the trip</b> in the panel that opens when you tap any province, stamped or not.
         Pick a day in <b>Date</b>, then say whether it is a day you have <b>Planned</b> or a day you
         have <b>Stamped</b>. A province you have not stamped starts on <b>Planned</b>, so a trip can be laid
@@ -704,7 +736,9 @@
         Clear and About &mdash; along with this page, so the header stays a single row. The menu
         closes when you pick something, tap away from it, or press Escape.</dd>
       <dd>The map is fitted into the band above an open province panel, so the panel never covers
-        the province you are looking at. Close the panel and the map settles back into the
+        the province you are looking at. The panel itself is a sheet on the bottom edge of the map,
+        with the status and the date held at the top of it and the photo scrolling underneath, and
+        the zoom buttons sit just above it. Close the panel and the map settles back into the
         whole space.</dd>
     </dl>
   </div>
@@ -762,7 +796,7 @@
 const SAVE_KEY = "stamplogs.visited.v1";
 const NICK_KEY = "stamplogs.nickname.v1";
 const TRIP_KEY = "stamplogs.trips.v1";
-const APP_VERSION = "1.7.0";
+const APP_VERSION = "1.8.0";
 const APP_NAME = "StampLogs";
 const APP_TITLE = "StampLogs";
 const UNDATED = "undated";
@@ -914,11 +948,13 @@ function fit(){
   provinces.forEach(p=>p.rings.forEach(r=>r.forEach(c=>{
     if(c[0]<x0)x0=c[0]; if(c[0]>x1)x1=c[0]; if(c[1]<y0)y0=c[1]; if(c[1]>y1)y1=c[1];
   })));
-  /* under 600px the callout is a fixed card on the bottom edge: fit the whole
+  /* under 600px the callout is a sheet on the bottom edge: fit the whole
      map into the band above it and align it to the top, so no province is
      covered and the lead line can always reach the one that is open */
-  const inset = (w <= 600 && provBox && !provBox.hidden)
-    ? Math.round((provBox.getBoundingClientRect().height || 162) + 22) : 0;
+  const sheetH = (w <= 600 && provBox && !provBox.hidden)
+    ? Math.round(provBox.getBoundingClientRect().height || 162) : 0;
+  els.stage.style.setProperty('--sheet-h', sheetH + 'px');
+  const inset = sheetH ? sheetH + 22 : 0;
   const availH = h - inset;
   const s = Math.min((w-2*pad)/(x1-x0), (availH-2*pad)/(y1-y0));
   base = {s, tx:(w-(x1-x0)*s)/2 - x0*s, ty:0};
@@ -1497,9 +1533,7 @@ function dropSheetURL(){ if(sheetURL){ URL.revokeObjectURL(sheetURL); sheetURL =
    before it is visited. The photo is what belongs to a stamp, so it waits for one. */
 function paintProvState(){
   const on = !!(sheetProv && visited[sheetProv.id]);
-  document.getElementById('prov-st').textContent =
-    on ? stampLabel(visited[sheetProv.id]) : "not stamped";
-  /* a photo belongs to a stamp, so its control waits for one */
+  /* a photo belongs to a stamp, so its controls wait for one */
   document.getElementById('prov-photoact').hidden = !on;
 }
 async function repaintProv(){
@@ -1511,6 +1545,7 @@ async function repaintProv(){
 async function openProv(p){
   sheetProv = p;
   wantStamp = false;
+  pendingKind = null;
   document.getElementById('prov-h').textContent = p.name;
   document.getElementById('prov-rg').textContent = p.region;
   paintProvState();
@@ -1524,6 +1559,7 @@ async function paintSheetPhoto(){
   const slot = document.getElementById('prov-slot');
   const rm = document.getElementById('prov-rmphoto');
   const add = document.getElementById('prov-add');
+  const addtxt = document.getElementById('prov-addtxt');
   dropSheetURL(); slot.textContent = "";
   let rec = null;
   try{ rec = sheetProv ? await photoGet(sheetProv.id) : null; }catch(e){}
@@ -1543,40 +1579,50 @@ async function paintSheetPhoto(){
     frame.appendChild(img);
     slot.appendChild(frame);
     img.onload = drawLead;
-    rm.hidden = false; add.hidden = true;
+    rm.hidden = false; add.hidden = false; addtxt.textContent = "Replace";
   } else {
     const d = document.createElement('div');
     d.className = "empty";
     d.textContent = sheetProv && visited[sheetProv.id]
       ? "No photo yet. Anything you add stays on this device and is never uploaded."
-      : "Not stamped yet. Set a date above whenever you like — a photo waits for the stamp.";
+      : sheetProv && isPlanned(sheetProv.id)
+      ? "Move it to stamped when you get back, and the photo slot opens up."
+      : "Pick planned to date a trip ahead, or stamped to log the day you went and add a photo.";
     slot.appendChild(d);
-    rm.hidden = true; add.hidden = false;
+    rm.hidden = true; add.hidden = false; addtxt.textContent = "Add photo";
   }
   drawLead();
 }
 
-/* the date field and the stamped / planned toggle */
+/* the date field and the not visited / planned / stamped control */
 const tripDate = document.getElementById('prov-date');
 const tripKind = document.getElementById('prov-kind');
 const tripNote = document.getElementById('prov-kind-note');
+const tripRow = document.getElementById('prov-trip');
+const tripTag = document.getElementById('prov-tag');
+/* a status picked before a date exists waits here for one */
+let pendingKind = null;
 
 function defaultKind(){
   return sheetProv && visited[sheetProv.id] ? "traveled" : "planned";
 }
+/* one of three, read off the log itself: a stamp, a plan, or neither */
+function statusOf(){
+  if(!sheetProv) return "none";
+  if(visited[sheetProv.id]) return "traveled";
+  return trips[String(sheetProv.id)] ? "planned" : "none";
+}
 function paintTrip(){
   const t = sheetProv ? trips[String(sheetProv.id)] : null;
+  const st = statusOf(), shown = pendingKind || st;
   tripDate.value = t ? t.date : "";
-  const kind = t ? t.kind : defaultKind();
-  tripKind.dataset.set = t ? "1" : "0";
   tripKind.querySelectorAll('button').forEach(b=>{
-    b.setAttribute("aria-pressed", b.dataset.kind === kind ? "true" : "false");
+    b.setAttribute("aria-pressed", b.dataset.kind === shown ? "true" : "false");
   });
-  /* a set date says itself, in the field and on the toggle, so the note is left
-     for the times there is nothing there yet to read. */
-  setNote(t ? "" : defaultKind() === "planned"
-    ? "Pick the day you plan to go. Stamp the province when you get there."
-    : "Planned holds the date until you go. Stamped puts the stamp on.");
+  /* nothing to date until the province is planned or stamped */
+  tripRow.hidden = st === "none" && !pendingKind;
+  tripTag.textContent = shown === "traveled" ? "went" : shown === "planned" ? "going" : "";
+  setNote("");
 }
 function setNote(msg){
   tripNote.textContent = msg;
@@ -1585,6 +1631,7 @@ function setNote(msg){
 function writeTrip(date, kind){
   if(!sheetProv) return;
   const p = sheetProv;
+  pendingKind = null;
   const t = setTrip(p.id, date, kind);
   /* the toggle is the same rule from the other end: stamped stamps the province,
      planned lifts the stamp. mark() leaves the kind alone, it already agrees. */
@@ -1595,6 +1642,7 @@ function writeTrip(date, kind){
   paintProv(p);   /* a planned date colours the province in */
   paintTrip();
   paintPlanRow();
+  paintSheetPhoto();   /* the photo slot follows the status, stamped or not */
   toast(t ? p.name + " " + tripLabel(t) + (lifted ? ", stamp lifted" : put ? ", stamped" : "")
           : "Date cleared for " + p.name);
 }
@@ -1602,35 +1650,60 @@ function writeTrip(date, kind){
 let wantStamp = false;
 tripDate.onchange = ()=>{
   const cur = sheetProv ? trips[String(sheetProv.id)] : null;
-  const kind = tripDate.value && wantStamp ? "traveled" : (cur ? cur.kind : defaultKind());
+  const kind = tripDate.value && wantStamp ? "traveled"
+    : tripDate.value && pendingKind ? pendingKind
+    : (cur ? cur.kind : defaultKind());
   wantStamp = false;
   writeTrip(tripDate.value, kind);
 };
 const STAMP_ASK = "Pick the day you went — the stamp goes on that date.";
+const PLAN_ASK = "Pick the day you plan to go — the plan sits on that date.";
 /* nothing is said about a province without a date to say it on, so an empty field
    is asked for first rather than acted on. */
 function askForDate(msg){
+  tripRow.hidden = false;
   setNote(msg);
   if(tripDate.showPicker){ try{ tripDate.showPicker(); }catch(err){ tripDate.focus(); } }
   else tripDate.focus();
 }
+/* not visited clears the province outright; the other two need a date to sit on */
+function clearProv(){
+  const p = sheetProv;
+  if(!p) return;
+  const had = !!visited[p.id] || !!trips[String(p.id)];
+  if(visited[p.id]){ delete visited[p.id]; save(); }
+  setTrip(p.id, "", "planned");
+  pendingKind = null;
+  paintProv(p);
+  paintProvState(); paintTrip(); paintPlanRow(); paintStats();
+  if(hot === p){ hot = null; setHot(p); }
+  paintSheetPhoto();
+  /* the photo itself is left in place, so stamping again brings it back */
+  if(had) toast(p.name + " set back to not visited");
+}
 tripKind.onclick = e=>{
   const b = e.target.closest('button'); if(!b || !sheetProv) return;
   wantStamp = false;
-  /* the toggle needs a date to describe, so ask for one first */
+  const kind = b.dataset.kind;
+  if(kind === statusOf() && !pendingKind) return;
+  if(kind === "none"){ clearProv(); return; }
+  /* the status needs a date to describe, so ask for one first */
   if(!tripDate.value){
+    pendingKind = kind;
     tripKind.querySelectorAll('button').forEach(x=>{
       x.setAttribute("aria-pressed", x === b ? "true" : "false");
     });
-    askForDate("Pick a date first — then it is saved as " + b.textContent.toLowerCase() + ".");
+    tripTag.textContent = kind === "traveled" ? "went" : "going";
+    askForDate(kind === "traveled" ? STAMP_ASK : PLAN_ASK);
     return;
   }
-  writeTrip(tripDate.value, b.dataset.kind);
+  writeTrip(tripDate.value, kind);
 };
 
 function closeProv(){
   provBox.hidden = true; showLead(false);
   wantStamp = false;
+  pendingKind = null;
   dropSheetURL(); sheetProv = null;
   relayout();
 }
