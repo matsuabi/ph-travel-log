@@ -1,4 +1,4 @@
-/* ── the three views, and the photos view: the same log read as a contact sheet ── */
+/* ── the four views, and the photos view: the same log read as a contact sheet ── */
 const photosEl = document.getElementById('photos');
 const viewSeg = document.getElementById('viewseg');
 const sortSeg = document.getElementById('photosort');
@@ -6,7 +6,8 @@ const photoSheetEl = document.getElementById('photosheet');
 let sheetURLs = [], pst = null;
 
 function setView(v){
-  mainView = v === "photos" || v === "list" ? v : "map";
+  mainView = v === "photos" || v === "list" || v === "calendar" ? v : "map";
+  if(mainView !== "calendar") closeCalOverlays();
   /* a panel open in the list belongs to the list */
   if(provRow && mainView !== "list") closeProv();
   try{ localStorage.setItem(VIEW_KEY, mainView); }catch(e){}
@@ -15,6 +16,7 @@ function setView(v){
     b.setAttribute('aria-pressed', String(b.dataset.view === mainView));
   });
   if(mainView === "photos") buildPhotoSheet();
+  else if(mainView === "calendar") buildCalendar();
   else if(mainView === "map") relayout();
 }
 function syncSortSeg(){

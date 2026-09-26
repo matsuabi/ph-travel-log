@@ -132,6 +132,7 @@ function paintStats(){
     d.querySelector('.bar i').style.width = (inG.length? done/inG.length*100 : 0) + "%";
     els.islands.appendChild(d);
   });
+  scheduleCalendar();
 }
 
 /* the switch reads the plans that exist, whether or not they are being drawn */

@@ -122,10 +122,35 @@
     <div id="photosheet"></div>
   </section>
 
+  <section class="calview" id="calview" aria-label="Calendar of your trips">
+    <div class="calyear">
+      <button type="button" class="step" id="cal-prev" aria-label="Previous year">&#8249;</button>
+      <button type="button" id="cal-pick" aria-haspopup="dialog" aria-expanded="false" aria-controls="calyears"><b id="cal-y"></b><em aria-hidden="true"></em></button>
+      <button type="button" class="step" id="cal-next" aria-label="Next year">&#8250;</button>
+    </div>
+    <div class="calscroll" id="calscroll">
+      <div class="calkey" aria-hidden="true">
+        <span><i data-st="traveled"></i>Stamped</span>
+        <span><i data-st="planned"></i>Planned</span>
+        <span><i data-st="both"></i>Both</span>
+      </div>
+      <div class="calgrid" id="calgrid"></div>
+    </div>
+    <div id="cal-scrim" hidden></div>
+    <div class="calyears" id="calyears" role="dialog" aria-label="Choose a year" hidden>
+      <div class="calyh">
+        <b>Choose a year</b>
+        <button type="button" id="cal-this">This year</button>
+      </div>
+      <div class="calyg" id="calyears-grid"></div>
+    </div>
+  </section>
+
   <nav class="tabs" id="viewseg" aria-label="What to show">
     <button type="button" data-view="map" aria-pressed="true"><b>Map</b></button>
     <button type="button" data-view="list" aria-pressed="false"><b>List</b></button>
     <button type="button" data-view="photos" aria-pressed="false"><b>Photos</b><em class="mono" id="viewcount">0</em></button>
+    <button type="button" data-view="calendar" aria-pressed="false"><b>Calendar</b></button>
   </nav>
 </div>
 <div id="toast" role="status"></div>
@@ -144,6 +169,16 @@
       <span id="viewer-date"></span>
     </div>
     <button class="ghost danger" id="viewer-remove">Remove photo</button>
+  </div>
+</div>
+
+<div class="scrim" id="calbox" hidden>
+  <div class="sheet calcard" role="dialog" aria-modal="true" aria-labelledby="calcard-h">
+    <header>
+      <div class="calct"><h2 id="calcard-h"></h2><span id="calcard-sub"></span></div>
+      <button class="x" id="calcard-close" aria-label="Close">&times;</button>
+    </header>
+    <div id="calcard-list"></div>
   </div>
 </div>
 
@@ -248,6 +283,15 @@
         <small>Photos are kept in this browser and are never uploaded. They are shrunk on the way
         in, which also strips the location and camera data your phone attaches to a picture.</small></dd>
 
+      <dt>Calendar</dt>
+      <dd><b>See your year at a glance</b> with <b>Calendar</b> next to Map, List and Photos. All twelve
+        months are laid out with every dated province on its day: green for stamped, clay for
+        planned, and split in two when a day holds both. A small number on a day says how many
+        provinces sit on it. Tap a coloured day to see which provinces they are, or a month&rsquo;s name
+        to see the whole month.
+        <small>Step through the years with the arrows, or tap the year to pick one of the ten before
+        or after this one. Plans follow <b>Show planned provinces</b>, the same as the map.</small></dd>
+
       <dt>Keeping a copy</dt>
       <dd><b>Keep a copy</b> with the buttons at the top. <b>Save file</b> writes your log out as a
         JSON file, or a ZIP holding your photos alongside it, and <b>Load file</b> reads either
@@ -261,9 +305,10 @@
       <dd><b>Tools</b> at the top right holds those buttons &mdash; Save file, Save image, Load file,
         Clear and About &mdash; along with this page, so the header stays a single row. The menu
         closes when you pick something, tap away from it, or press Escape.</dd>
-      <dd><b>Map</b>, <b>List</b> and <b>Photos</b> sit in a bar along the bottom edge, and each view&rsquo;s own
+      <dd><b>Map</b>, <b>List</b>, <b>Photos</b> and <b>Calendar</b> sit in a bar along the bottom edge, and each view&rsquo;s own
         controls sit just above it: the counter on the map, which you pull up for the island bars,
-        the planned switch and the nickname; search and grouping on the list; grouping on the photos.</dd>
+        the planned switch and the nickname; search and grouping on the list; grouping on the photos;
+        the year on the calendar.</dd>
       <dd>The map is fitted into the band above an open province panel, so the panel never covers
         the province you are looking at. The panel itself is a sheet on the bottom edge of the map,
         with the status and the date held at the top of it and the photo scrolling underneath, and
@@ -337,6 +382,7 @@
 <script src="js/log-file.js"></script>
 <script src="js/dialogs.js"></script>
 <script src="js/photos-view.js"></script>
+<script src="js/calendar-view.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

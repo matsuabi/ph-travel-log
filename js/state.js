@@ -94,7 +94,7 @@ function setShowPlanned(on){
 function loadView(){
   try{
     const v = localStorage.getItem(VIEW_KEY);
-    return v === "photos" || v === "list" ? v : "map";
+    return v === "photos" || v === "list" || v === "calendar" ? v : "map";
   }catch(e){ return "map"; }
 }
 function loadPhotoSort(){

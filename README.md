@@ -21,7 +21,7 @@ python3 -m http.server 8000
 
 - **Stamp provinces** by tapping one on the map and setting it **Not visited**,
   **Planned** or **Stamped**. Planned and Stamped ask for a date first.
-- **Switch views** with the **Map**, **List** and **Photos** tabs along the bottom.
+- **Switch views** with the **Map**, **List**, **Photos** and **Calendar** tabs along the bottom.
 - **Work the list** — a square on each row stamps the province, the row shows its
   date, and tapping the name opens the province panel right under the row.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
@@ -41,6 +41,9 @@ python3 -m http.server 8000
   contact sheet, grouped by island, by region or A–Z. Open one and it fills the
   screen with the province, its date and a way to remove it; swipe to move
   through the rest.
+- **See the year as a calendar** — a **Calendar** view lays out all twelve months
+  with every dated province on its day, stamped and planned in their own colours.
+  Tap a day or a month to see which provinces are on it, and step or jump between years.
 - **Save an image** — a poster-sized PNG of your map with the count and a date.
 - **Save and load a file** — JSON, or a ZIP when there are photos to carry.
   Saved files are named `nickname-stamplogs-date`, or `stamplogs-date` when the
@@ -70,6 +73,7 @@ log is kept, the count of 82, the boundary data and the terms.
 | `js/log-file.js`      | **Save file** and **Load file**                                   |
 | `js/dialogs.js`       | Clear, How to use, About, Escape, and the phone tools menu        |
 | `js/photos-view.js`   | The Photos contact sheet and the full-screen viewer               |
+| `js/calendar-view.js` | The Calendar view, the year picker and the day or month card      |
 | `js/main.js`          | Starts the app — loads last                                       |
 | `LICENSE`             | MIT                                                               |
 
@@ -91,7 +95,7 @@ Everything is in `localStorage`, under these keys:
 | `stamplogs.groupby.v1`    | Island or region grouping               |
 | `stamplogs.trips.v1`      | Trip dates, each with `date` and `kind` |
 | `stamplogs.showplanned.v1`| Whether planned provinces are drawn     |
-| `stamplogs.view.v1`       | Map or Photos view                      |
+| `stamplogs.view.v1`       | Map, List, Photos or Calendar view      |
 | `stamplogs.photosort.v1`  | How the contact sheet is grouped        |
 
 Photos live separately, in an IndexedDB database called `stamplogs-photos` — one
@@ -122,6 +126,18 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.12.0 — 2026-09-26
+
+- Added: a **Calendar** view, next to Map, List and Photos, showing the year as
+  twelve months with every dated province on its day — green for stamped, clay
+  for planned, split when a day holds both, and a count when a day has more than one.
+- Added: tap a day, or a month's name, for a card listing its provinces and status.
+- Added: step through years with the arrows, or tap the year to pick one within
+  ten years either side.
+- Changed: How to use covers the Calendar view.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.11.0 — 2026-09-26
 

@@ -411,6 +411,111 @@ body[data-view="list"] main,body[data-view="photos"] main{display:none}
 .pempty{padding:44px 24px;text-align:center;font-size:13px;line-height:1.55;color:var(--ink-2)}
 .pempty b{display:block;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:7px}
 
+/* ── calendar view: twelve months, every dated province on its day ── */
+.calview{order:2;display:none;flex:1;min-height:0;flex-direction:column;position:relative;background:var(--paper)}
+body[data-view="calendar"] .calview{display:flex}
+body[data-view="calendar"] main{display:none}
+.calyear{
+  flex:none;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 24px;
+  border-bottom:1px solid var(--rule);background:var(--panel);
+}
+.calyear button{
+  height:44px;border:1px solid var(--rule);border-radius:2px;background:transparent;color:var(--ink);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.calyear .step{width:44px;font-size:18px;line-height:1;display:grid;place-content:center}
+.calyear .step:disabled{color:#BFBCB1;cursor:default}
+.calyear .step:not(:disabled):hover{border-color:var(--clay);color:var(--clay)}
+#cal-pick{flex:1;max-width:320px;border-color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+#cal-pick b{font-family:var(--serif);font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
+#cal-pick em{font-style:normal;font-size:10px}
+#cal-pick em::before{content:"\25BE"}
+#cal-pick:hover{color:var(--clay);border-color:var(--clay)}
+.calscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.calkey{
+  display:flex;gap:16px;padding:12px max(24px, calc((100% - 1052px)/2));
+  border-bottom:1px solid var(--rule-2);font-size:11px;color:var(--ink-2);
+}
+.calkey span{display:flex;align-items:center;gap:6px}
+.calkey i{width:10px;height:10px;display:block}
+.calkey i[data-st="traveled"]{background:var(--visited)}
+.calkey i[data-st="planned"]{background:var(--planned)}
+.calkey i[data-st="both"]{background:linear-gradient(135deg,var(--visited) 0 50%,var(--planned) 50% 100%)}
+.calgrid{
+  max-width:1100px;margin:0 auto;padding:20px 24px 32px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:28px 24px;
+}
+.calmonth{display:flex;flex-direction:column;gap:8px;min-width:0}
+.calmh{
+  display:flex;align-items:baseline;gap:6px;border:0;background:none;padding:4px 0;margin:-4px 0;
+  text-align:left;font:inherit;color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.calmh b{font-size:13px;font-weight:600}
+.calmh span{font-size:10.5px;color:#A9A79D}
+.calmh:hover b{color:var(--clay)}
+.calmh:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.caldays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.calwd{font:500 9px/1 var(--sans);color:#BFBCB1;text-align:center;padding-bottom:3px}
+.calday{
+  position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font:500 11px/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink-2);
+  border:0;padding:0;background:transparent;border-radius:1px;
+}
+button.calday{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.calday[data-st="traveled"]{background:var(--visited);color:var(--panel)}
+.calday[data-st="planned"]{background:var(--planned);color:var(--ink)}
+.calday[data-st="both"]{background:linear-gradient(135deg,var(--visited) 0 50%,var(--planned) 50% 100%);color:var(--panel)}
+.calday[data-today="1"]{box-shadow:inset 0 0 0 1.5px var(--ink)}
+button.calday:hover{outline:1.5px solid var(--ink);outline-offset:1px}
+button.calday:focus-visible{outline:2px solid var(--clay);outline-offset:1px}
+.calday i{
+  position:absolute;top:-4px;right:-4px;min-width:13px;height:13px;padding:0 3px;border-radius:7px;
+  background:var(--ink);color:var(--panel);border:1px solid var(--paper);
+  font:600 8px/11px var(--sans);font-style:normal;text-align:center;
+}
+#cal-scrim{position:absolute;inset:0;background:rgba(27,29,26,.34);z-index:4}
+#cal-scrim[hidden],.calyears[hidden]{display:none}
+.calyears{
+  position:absolute;left:50%;transform:translateX(-50%);top:70px;width:min(406px,calc(100% - 24px));
+  background:var(--panel);border:1px solid var(--ink);border-radius:2px;
+  box-shadow:0 10px 30px rgba(27,29,26,.16);z-index:5;
+}
+.calyh{display:flex;align-items:center;gap:10px;padding:4px 14px;border-bottom:1px solid var(--rule)}
+.calyh b{font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.calyh button{
+  margin-left:auto;border:0;background:none;padding:14px 4px;min-height:44px;
+  font:500 12px/1 var(--sans);color:var(--visited);cursor:pointer;
+}
+.calyh button:hover{color:var(--clay)}
+.calyg{padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.calyg button{
+  min-height:46px;border:1px solid var(--rule);border-radius:2px;background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  font:500 14px/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.calyg button::after{content:"";width:4px;height:4px;border-radius:50%;background:transparent;display:block}
+.calyg button[data-has="1"]::after{background:var(--visited)}
+.calyg button[data-now="1"]{border-color:var(--ink)}
+.calyg button:hover{border-color:var(--clay);color:var(--clay)}
+.calyg button[data-on="1"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.calyg button[data-on="1"][data-has="1"]::after{background:var(--paper)}
+/* a day or a month: a small card, names and status only */
+.calcard{width:min(360px,100%)}
+.calcard header{gap:10px}
+.calct{display:flex;flex-direction:column;gap:5px;min-width:0}
+.calct span{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#A9A79D}
+.calrow{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:52px;border-bottom:1px solid var(--rule-2)}
+.calrow:last-child{border-bottom:0}
+.calrow .d{width:22px;flex:none;font-family:var(--serif);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+#calcard-list[data-mode="day"] .d{display:none}
+.calrow i{width:10px;height:10px;flex:none;border-radius:1px;background:var(--visited);display:block}
+.calrow[data-st="planned"] i{background:var(--planned)}
+.calrow .nm{flex:1;min-width:0;font-size:15px}
+.calrow em{font:500 10px/1 var(--sans);font-style:normal;letter-spacing:.13em;text-transform:uppercase;color:var(--visited)}
+.calrow[data-st="planned"] em{color:var(--clay)}
+.calnone{padding:18px 24px 22px;font-size:13px;color:var(--ink-2)}
+
 /* ── one photo on its own: the sheet read one frame at a time ── */
 .viewer{
   position:fixed;inset:0;z-index:40;background:var(--paper);
@@ -522,12 +627,12 @@ body[data-view="list"] main,body[data-view="photos"] main{display:none}
 
   /* views on the bottom edge, where the thumb is */
   .tabs{
-    order:3;display:grid;grid-template-columns:1fr 1fr 1fr;padding:0 0 env(safe-area-inset-bottom);
+    order:3;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:0 0 env(safe-area-inset-bottom);
     border-bottom:0;border-top:1px solid var(--rule-2);
   }
   .tabs button{
     justify-content:center;align-items:center;min-height:56px;border:0;border-radius:0;
-    font-size:12px;letter-spacing:.1em;
+    font-size:11px;letter-spacing:.08em;padding:0 4px;
   }
   .tabs button:first-child,.tabs button:last-child{border-radius:0}
   .tabs button + button{border-left:1px solid var(--rule-2)}
@@ -568,4 +673,18 @@ body[data-view="list"] main,body[data-view="photos"] main{display:none}
   .viewer .vhead{padding-left:18px;padding-right:18px}
   .vfoot{padding-left:18px;padding-right:18px}
   .vstage{padding:16px 14px}
+  /* the year sits just above the tabs, and its picker opens upward */
+  .calyear{order:2;border-bottom:0;border-top:1px solid var(--rule);padding:10px 14px}
+  #cal-pick{max-width:none}
+  #cal-pick em::before{content:"\25B4"}
+  .calyears{top:auto;bottom:68px}
+  .calkey{padding:12px 18px}
+  .calgrid{grid-template-columns:1fr 1fr;gap:22px 16px;padding:16px 16px 26px}
+  .calmh b{font-size:12.5px}
+  .calmh span{font-size:10px}
+  .calwd{font-size:8.5px}
+  .calday{font-size:9.5px}
+  .calday i{min-width:12px;height:12px;padding:0 2px;font-size:7.5px;line-height:10px}
+  .calrow{padding:0 18px}
+  .calnone{padding:16px 18px 20px}
 }
