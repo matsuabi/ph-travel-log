@@ -20,8 +20,10 @@ python3 -m http.server 8000
 ## What it does
 
 - **Stamp provinces** by tapping one on the map and setting it **Not visited**,
-  **Planned** or **Stamped**. Planned and Stamped ask for a date first. Every list
-  row carries the same three buttons, and tapping the name opens the province.
+  **Planned** or **Stamped**. Planned and Stamped ask for a date first.
+- **Switch views** with the **Map**, **List** and **Photos** tabs along the bottom.
+- **Work the list** — a square on each row stamps the province, the row shows its
+  date, and tapping the name opens the province panel right under the row.
 - **Pan and zoom** by dragging, scrolling, pinching, or the +/−/FIT buttons.
 - **See Metro Manila** on the map, hatched — drawn so Luzon has no hole at the
   capital, but never stamped, listed or counted, since it is a region, not a province.
@@ -60,7 +62,7 @@ log is kept, the count of 82, the boundary data and the terms.
 | `js/state.js`         | The log in memory — stamps, dates, nickname — and saving it       |
 | `js/dom.js`           | Shared elements and helpers: toast, download, file names          |
 | `js/map.js`           | Decoding and fitting the map, drawing, stamping, pan and zoom     |
-| `js/sidebar.js`       | The tally, nickname, planned switch and province list             |
+| `js/sidebar.js`       | The stats on the map and the province list view                   |
 | `js/photo-store.js`   | Photos in IndexedDB, and shrinking them on the way in             |
 | `js/panel.js`         | The province panel: status, date, photo and the lead line         |
 | `js/poster.js`        | **Save image**                                                    |
@@ -120,6 +122,18 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.11.0 — 2026-09-26
+
+- Added: a **List** view — Map, List and Photos are now tabs along the bottom.
+- Changed: each list row has one stamp square and shows the province's date.
+- Added: tapping a name in the list opens the province panel right under the row;
+  its photo opens full screen.
+- Added: each list group shows how many of its provinces are stamped.
+- Changed: the counter sits on the map and opens to the island bars, the planned
+  switch and the nickname.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.10.0 — 2026-09-13
 

@@ -16,7 +16,8 @@ body{
 a{color:var(--visited);text-decoration:none;border-bottom:1px solid var(--rule)}
 a:hover{color:var(--clay);border-bottom-color:currentColor}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100%}
+.app{display:flex;flex-direction:column;height:100%;height:100dvh}
+.app > header{flex:none}
 
 header{
   display:flex;align-items:baseline;gap:14px;
@@ -78,8 +79,8 @@ header .spacer{flex:1}
 }
 #toast.up{opacity:1;transform:translate(-50%,0)}
 
-main{display:grid;grid-template-columns:1fr 372px;min-height:0}
-.stage{position:relative;min-width:0;overflow:hidden}
+main{order:2;flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.stage{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden}
 #svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
 .prov{transition:fill .4s ease;stroke:#C7C2B4;stroke-width:.7px;vector-effect:non-scaling-stroke}
 /* Metro Manila: hatched, never filled, never tapped — the one texture the map uses */
@@ -109,14 +110,34 @@ main{display:grid;grid-template-columns:1fr 372px;min-height:0}
 .zoom button:hover{border-color:var(--clay);color:var(--clay)}
 .zoom .wide{width:auto;padding:0 13px;font-size:11px;letter-spacing:.06em}
 
-aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;flex-direction:column;min-height:0}
-.tally{padding:24px 24px 20px;border-bottom:1px solid var(--rule)}
-.tally .big{display:flex;align-items:baseline;gap:8px}
-.tally .big b{font-family:var(--serif);font-size:60px;font-weight:600;letter-spacing:-.01em;line-height:.9}
-.tally .big i{font-family:var(--serif);font-style:normal;font-size:19px;color:var(--ink-2)}
-.tally .cap{margin-top:9px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
-.meter{margin-top:14px;height:3px;background:var(--rule-2);position:relative}
-.meter i{position:absolute;inset:0 auto 0 0;background:var(--visited);transition:width .5s ease}
+/* ── stats: a card on the map on a wide screen, a strip above the tabs on a phone ── */
+.stats{
+  position:absolute;left:18px;top:18px;width:292px;z-index:4;
+  background:var(--panel);border:1px solid var(--rule);border-radius:2px;
+  box-shadow:0 6px 20px rgba(27,29,26,.10);
+  display:flex;flex-direction:column;max-height:calc(100% - 36px);overflow-y:auto;
+}
+.statsbar{
+  display:flex;flex-direction:column;gap:9px;width:100%;border:0;background:transparent;
+  padding:15px 18px 14px;text-align:left;font:inherit;color:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.statsbar:focus-visible{outline:2px solid var(--clay);outline-offset:-2px}
+.statsbar .grip{display:none;justify-content:center}
+.statsbar .grip span{width:44px;height:4px;border-radius:2px;background:var(--rule);display:block}
+.sline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sline .big{display:flex;align-items:baseline;gap:6px}
+.sline .big b{font-family:var(--serif);font-size:40px;font-weight:600;line-height:.9;letter-spacing:-.01em}
+.sline .big i{font-family:var(--serif);font-style:normal;font-size:16px;color:var(--ink-2)}
+.sline .cap{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.sline .pl{margin-left:auto;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--clay)}
+.statsbar:hover .sline .cap{color:var(--clay)}
+.stats[data-open="off"] .statsmore{display:none}
+.statsmore{border-top:1px solid var(--rule)}
+.statsmore .islands{padding:14px 18px;gap:11px}
+.statsmore .planrow{padding:12px 18px}
+.statsmore .nickrow{padding:8px 18px 12px;margin-top:0}
+.meter{display:block;height:3px;background:var(--rule-2);position:relative}
 .nickrow{display:flex;align-items:baseline;gap:10px;margin-top:14px}
 .nickrow span{
   flex:none;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D;
@@ -276,8 +297,12 @@ aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;fle
 .planrow .t small{display:block;margin-top:3px;font-size:11px;color:var(--ink-2)}
 .planrow:hover .t{color:var(--clay)}
 
-.listtoggle{display:none}
-.listhead{display:flex;align-items:center;gap:10px;padding:12px 24px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+/* ── list view: every province, with search and grouping ── */
+.listview{order:2;display:none;flex:1;min-height:0;flex-direction:column;background:var(--panel)}
+.listhead{
+  order:-1;flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:12px max(24px, calc((100% - 760px)/2));border-bottom:1px solid var(--rule);background:var(--panel);
+}
 .listhead input{
   flex:1;min-width:130px;border:0;background:transparent;font:400 15px var(--sans);color:var(--ink);
   outline:none;padding:6px 0;min-height:34px;
@@ -294,13 +319,34 @@ aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;fle
 .seg button:hover{color:var(--clay)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 
-.list{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
-.grp{padding:16px 24px 5px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
-/* a row: the name opens the panel, and the three buttons beside it set the status */
+.list{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;padding:0 max(0px, calc((100% - 760px)/2)) 24px}
+.grp{padding:16px 24px 5px;display:flex;gap:9px;align-items:baseline;color:#A9A79D}
+.grp b{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+.grp span{font-size:10.5px}
+/* a row: the square stamps, the name opens the panel, the date says when */
 .row{
-  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
-  padding:0 24px;min-height:52px;border-bottom:1px solid var(--rule-2);
+  display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:0 8px;align-items:center;
+  padding:0 24px 0 10px;min-height:52px;border-bottom:1px solid var(--rule-2);
 }
+.row .tick{
+  width:44px;height:44px;border:0;background:none;padding:0;display:grid;place-content:center;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.row .tick span{
+  width:16px;height:16px;border-radius:1px;display:block;position:relative;
+  border:1px solid var(--rule);background:#fff;transition:background .2s,border-color .2s;
+}
+.row .tick:hover span{border-color:var(--clay)}
+.row .tick:focus-visible{outline:2px solid var(--clay);outline-offset:-6px}
+.row[data-st="planned"] .tick span{background:var(--planned);border-color:var(--planned-line)}
+.row[data-st="traveled"] .tick span{background:var(--visited);border-color:var(--visited)}
+.row[data-st="traveled"] .tick span::after{
+  content:"";position:absolute;left:4.5px;top:1px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.row .when{font-size:10.5px;color:#A9A79D;white-space:nowrap}
+.row[data-st="planned"] .when{color:var(--clay)}
+.row[data-st="traveled"] .when{color:var(--visited)}
 .row:hover{background:#F4F1E9}
 .row .open{
   display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;
@@ -317,36 +363,29 @@ aside{border-left:1px solid var(--rule);background:var(--panel);display:flex;fle
 .row .nm{font-size:14px;line-height:1.25}
 .row[data-on="1"] .nm{color:var(--ink-2)}
 .row .rg{font-size:10.5px;color:#A9A79D}
-.rseg{
-  display:grid;grid-template-columns:repeat(3,58px);
-  border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:#fff;
-}
-.rseg button{
-  font:500 9px/1.15 var(--sans);letter-spacing:.05em;text-transform:uppercase;
-  padding:4px 3px;min-height:36px;border:0;background:transparent;color:var(--ink-2);
-  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
-}
-.rseg button + button{border-left:1px solid var(--rule)}
-.rseg button:hover{color:var(--clay)}
-.rseg button:focus-visible{outline:2px solid var(--clay);outline-offset:-2px}
-.rseg button[data-kind="none"][aria-pressed="true"]{background:var(--unvisited);color:var(--ink)}
-.rseg button[data-kind="planned"][aria-pressed="true"]{background:var(--planned);color:var(--ink)}
-.rseg button[data-kind="traveled"][aria-pressed="true"]{background:var(--visited);color:var(--panel)}
-.rseg button[aria-pressed="true"]:hover{color:inherit}
-
 /* ── photos view: the same log read as a contact sheet ── */
-.viewbar{
-  display:flex;align-items:center;gap:14px;padding:10px 24px 11px;
+/* ── the three views: segments under the header, tabs on the bottom edge on a phone ── */
+.tabs{
+  order:1;flex:none;display:flex;align-items:center;padding:10px 24px 11px;
   border-bottom:1px solid var(--rule);background:var(--panel);
 }
-.viewbar .seg{margin-left:0}
-.viewbar .tallyline{margin-left:auto;display:flex;align-items:baseline;gap:7px}
-.viewbar .tallyline b{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1}
-.viewbar .tallyline span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
-main,.photos{grid-row:3}
-.photos{display:none;flex-direction:column;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
-body[data-view="photos"] .photos{display:flex}
-body[data-view="photos"] main{display:none}
+.tabs button{
+  display:flex;align-items:baseline;gap:7px;font:500 10px/1 var(--sans);letter-spacing:.13em;
+  text-transform:uppercase;padding:11px 14px;min-height:36px;border:1px solid var(--rule);
+  background:transparent;color:var(--ink-2);cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.tabs button + button{border-left:0}
+.tabs button:first-child{border-radius:2px 0 0 2px}
+.tabs button:last-child{border-radius:0 2px 2px 0}
+.tabs button b{font-weight:500}
+.tabs button em{font-style:normal;font-size:10.5px;letter-spacing:.02em;color:#A9A79D}
+.tabs button:hover{color:var(--clay)}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs button[aria-pressed="true"] em{color:#A7ADA4}
+.photos{order:2;display:none;flex:1;flex-direction:column;min-height:0}
+#photosheet{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+body[data-view="list"] .listview,body[data-view="photos"] .photos{display:flex}
+body[data-view="list"] main,body[data-view="photos"] main{display:none}
 .sortbar{
   display:flex;align-items:center;gap:10px;padding:11px 24px;flex:none;
   border-bottom:1px solid var(--rule);background:var(--panel);
@@ -415,12 +454,28 @@ body[data-view="photos"] main{display:none}
 .vdots i{width:5px;height:5px;border-radius:50%;background:var(--rule);display:block}
 .vdots i.on{background:var(--ink)}
 
+/* ── a province opened from the list: the panel opens in place under its row ── */
+.row[data-open="1"]{background:#F6F3EC;box-shadow:inset 3px 0 0 var(--ink);border-bottom-color:transparent}
+.row[data-open="1"]:hover{background:#F6F3EC}
+.row[data-open="1"] .nm{font-weight:500;color:var(--ink)}
+.callout.inrow{
+  position:static;inset:auto;width:auto;height:auto;max-height:none;z-index:auto;
+  display:flex;flex-direction:column;
+  border:0;border-bottom:1px solid var(--rule);border-radius:0;
+  box-shadow:inset 3px 0 0 var(--ink);background:#F6F3EC;
+}
+.callout.inrow > .grip,.callout.inrow > header{display:none}
+.callout.inrow .pfixed{padding:0 24px 12px 62px;border-bottom:0}
+.callout.inrow .pbody{padding:0 24px 16px 62px;overflow:visible;gap:10px}
+.callout.inrow .seg3,.callout.inrow .date{background:var(--panel)}
+.callout.inrow .pbody:has(.photoframe){display:grid;grid-template-columns:132px minmax(0,1fr);align-items:stretch}
+.callout.inrow .photoframe{aspect-ratio:auto !important;height:100px;min-height:0;max-height:none;cursor:zoom-in}
+.callout.inrow .photo{width:100%;height:100%;object-fit:cover}
+.callout.inrow .pbody:has(.photoframe) .photoact{flex-direction:column;gap:8px;margin:0;padding:0}
+.callout.inrow .photoact > *{flex:1;background:var(--panel)}
+.callout.inrow .empty{padding:2px 0 4px}
+
 @media (max-width:1000px){
-  .app{height:auto;min-height:100%}
-  main{grid-template-columns:1fr;grid-template-rows:auto auto}
-  .stage{height:52vh;min-height:320px}
-  aside{border-left:0;border-top:1px solid var(--rule)}
-  .list{overflow:visible;flex:none}
   .hud .hint{display:none}
 }
 @media (max-width:600px){
@@ -465,37 +520,48 @@ body[data-view="photos"] main{display:none}
   /* on a phone the frame gives way first, so the controls stay in reach */
   .callout .photoframe{aspect-ratio:3/2;max-height:46vh}
 
-  /* the list folds away, so the map and the panel get the screen */
-  .listtoggle{
-    display:flex;align-items:center;gap:10px;width:100%;
-    padding:0 18px;min-height:54px;border:0;border-bottom:1px solid var(--rule);
-    background:var(--panel);font:500 13px/1 var(--sans);color:var(--ink);
-    text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  /* views on the bottom edge, where the thumb is */
+  .tabs{
+    order:3;display:grid;grid-template-columns:1fr 1fr 1fr;padding:0 0 env(safe-area-inset-bottom);
+    border-bottom:0;border-top:1px solid var(--rule-2);
   }
-  .listtoggle em{font-style:normal;font-size:11.5px;color:var(--ink-2);margin-left:auto}
-  .listtoggle i{font-style:normal;font-size:10px;color:var(--ink-2)}
-  aside[data-list="off"] .listtoggle{border-bottom:0}
-  aside[data-list="off"] .listhead,aside[data-list="off"] .list{display:none}
-  main:has(aside[data-list="off"]) .stage{height:74vh}
+  .tabs button{
+    justify-content:center;align-items:center;min-height:56px;border:0;border-radius:0;
+    font-size:12px;letter-spacing:.1em;
+  }
+  .tabs button:first-child,.tabs button:last-child{border-radius:0}
+  .tabs button + button{border-left:1px solid var(--rule-2)}
+  .tabs button em{display:none}
+  .tabs button[aria-pressed="true"]{
+    background:transparent;color:var(--ink);border-color:var(--rule-2);box-shadow:inset 0 2px 0 var(--ink);
+  }
+  /* each view's own controls sit just above the tabs */
+  .stats{
+    position:static;width:auto;flex:none;max-height:58%;border:0;border-top:1px solid var(--rule);
+    border-radius:0;box-shadow:none;
+  }
+  .statsbar{padding:8px 18px 11px;gap:7px}
+  .statsbar .grip{display:flex}
+  .sline .big b{font-size:22px;line-height:1}
+  .sline .big i{font-size:15px}
+  .listhead{order:0;border-bottom:0;border-top:1px solid var(--rule);padding:10px 18px 12px}
+  .list{padding-bottom:8px}
+  .sortbar{order:2;border-bottom:0;border-top:1px solid var(--rule)}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
   .sheet dl{padding:4px 18px 20px}
   .sheet header{padding:16px 18px 13px}
   .sheet .sig{padding:14px 18px}
-  .stage{height:62vh;min-height:430px}
   /* the zoom buttons ride above the open sheet */
   .hud{left:14px;bottom:calc(var(--sheet-h, 0px) + 14px)}
-  .tally{padding:20px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
-  .tally .big{grid-row:1/3}
-  .tally .big b{font-size:46px}
-  .tally .cap{margin-top:0;align-self:end}
-  .meter{grid-column:2;margin-top:8px;align-self:start}
-  .nickrow{grid-column:1/-1;margin-top:8px}
-  .islands{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .planrow{padding:13px 18px}
-  .listhead{padding:10px 18px}
+  .statsmore .islands{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .statsmore .planrow{padding:12px 18px}
   .seg button{padding:10px 9px}
   .grp{padding:14px 18px 5px}
-  .row{padding:0 18px;min-height:52px}
-  .viewbar,.sortbar{padding-left:18px;padding-right:18px}
+  .row{padding:0 18px 0 6px;min-height:52px}
+  .callout.inrow .pfixed{padding:0 18px 12px 58px}
+  .callout.inrow .pbody{padding:0 18px 16px 58px}
+  .callout.inrow .photoframe{max-height:none}
+  .sortbar{padding-left:18px;padding-right:18px}
   .pgrp{padding:10px 18px}
   .psheet{padding:13px 18px 20px;grid-template-columns:1fr 1fr 1fr}
   .pempty{padding:34px 18px}

@@ -1,4 +1,4 @@
-/* ── photos view: the same log read as a contact sheet ── */
+/* ── the three views, and the photos view: the same log read as a contact sheet ── */
 const photosEl = document.getElementById('photos');
 const viewSeg = document.getElementById('viewseg');
 const sortSeg = document.getElementById('photosort');
@@ -6,13 +6,16 @@ const photoSheetEl = document.getElementById('photosheet');
 let sheetURLs = [], pst = null;
 
 function setView(v){
-  mainView = v === "photos" ? "photos" : "map";
+  mainView = v === "photos" || v === "list" ? v : "map";
+  /* a panel open in the list belongs to the list */
+  if(provRow && mainView !== "list") closeProv();
   try{ localStorage.setItem(VIEW_KEY, mainView); }catch(e){}
   document.body.dataset.view = mainView;
   viewSeg.querySelectorAll('button').forEach(b=>{
     b.setAttribute('aria-pressed', String(b.dataset.view === mainView));
   });
-  if(mainView === "photos") buildPhotoSheet(); else relayout();
+  if(mainView === "photos") buildPhotoSheet();
+  else if(mainView === "map") relayout();
 }
 function syncSortSeg(){
   sortSeg.querySelectorAll('button').forEach(b=>{
@@ -30,7 +33,7 @@ sortSeg.onclick = e=>{
   try{ localStorage.setItem(PSORT_KEY, photoSort); }catch(err){}
   syncSortSeg();
   buildPhotoSheet();
-  photosEl.scrollTop = 0;
+  photoSheetEl.scrollTop = 0;
 };
 function dropSheetURLs(){ sheetURLs.forEach(u=> URL.revokeObjectURL(u)); sheetURLs = []; }
 function paintPhotoCount(){ document.getElementById('viewcount').textContent = String(photoIds.size); }
@@ -168,6 +171,13 @@ function openViewer(i){
   viewerEl.hidden = false;
   paintViewer();
   document.getElementById('viewer-close').focus({preventScroll:true});
+}
+/* open one province's photo full screen, from anywhere — the viewer steps
+   through the same order as the contact sheet */
+async function openPhotoFull(p){
+  await buildPhotoSheet();
+  const i = sheetOrder.indexOf(p);
+  if(i >= 0) openViewer(i);
 }
 function closeViewer(){
   viewerEl.hidden = true;

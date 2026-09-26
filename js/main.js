@@ -16,7 +16,7 @@ if(window.ResizeObserver){
 requestAnimationFrame(relayout);
 window.addEventListener('load', relayout);
 
-setListOpen(!narrow.matches);
+setStatsOpen(!narrow.matches);
 
 prepare();
 fit();

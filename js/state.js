@@ -92,7 +92,10 @@ function setShowPlanned(on){
 }
 
 function loadView(){
-  try{ return localStorage.getItem(VIEW_KEY) === "photos" ? "photos" : "map"; }catch(e){ return "map"; }
+  try{
+    const v = localStorage.getItem(VIEW_KEY);
+    return v === "photos" || v === "list" ? v : "map";
+  }catch(e){ return "map"; }
 }
 function loadPhotoSort(){
   try{

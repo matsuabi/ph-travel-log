@@ -28,14 +28,6 @@
   </header>
   <div id="tools-scrim" hidden></div>
 
-  <div class="viewbar">
-    <div class="seg" id="viewseg" role="group" aria-label="What to show">
-      <button type="button" data-view="map" aria-pressed="true">Map</button>
-      <button type="button" data-view="photos" aria-pressed="false">Photos</button>
-    </div>
-    <div class="tallyline"><b class="mono" id="viewcount">0</b><span>photos</span></div>
-  </div>
-
   <main>
     <div class="stage">
       <svg id="svg" aria-label="Map of the Philippines by province"></svg>
@@ -83,34 +75,40 @@
       </div>
     </div>
 
-    <aside>
-      <div class="tally">
-        <div class="big"><b class="mono" id="count">0</b><i class="mono">/ 82</i></div>
-        <div class="cap" id="pct">0% of the archipelago</div>
-        <div class="meter"><i id="meter" style="width:0%"></i></div>
+    <div class="stats" id="stats" data-open="off">
+      <button type="button" class="statsbar" id="statstoggle" aria-expanded="false" aria-controls="statsmore">
+        <span class="grip" aria-hidden="true"><span></span></span>
+        <span class="sline">
+          <span class="big"><b class="mono" id="count">0</b><i class="mono">/ 82</i></span>
+          <span class="cap" id="pct">0% stamped</span>
+          <span class="pl" id="plan-short"></span>
+        </span>
+        <span class="meter"><i id="meter" style="width:0%"></i></span>
+      </button>
+      <div class="statsmore" id="statsmore">
+        <div class="islands" id="islands"></div>
+        <label class="planrow" for="showplan">
+          <input type="checkbox" id="showplan" checked>
+          <span class="t">Show planned provinces<small id="planned-n"></small></span>
+        </label>
         <label class="nickrow" for="nick"><span>Nickname</span>
           <input id="nick" class="nick" type="text" maxlength="24" autocomplete="off"
             placeholder="Abi&rsquo;s"></label>
       </div>
-      <div class="islands" id="islands"></div>
-      <label class="planrow" for="showplan">
-        <input type="checkbox" id="showplan" checked>
-        <span class="t">Show planned provinces<small id="planned-n"></small></span>
-      </label>
-      <button class="listtoggle" id="listtoggle" aria-expanded="true" aria-controls="list">
-        <span>All provinces</span><em class="mono" id="listtoggle-n"></em><i aria-hidden="true">&#9662;</i>
-      </button>
-      <div class="listhead">
-        <input id="q" type="search" placeholder="Find a province" autocomplete="off" autocapitalize="none">
-        <span class="n mono" id="qn"></span>
-        <div class="seg" id="groupby" role="group" aria-label="Group the list by">
-          <button type="button" data-mode="island" aria-pressed="true">Island</button>
-          <button type="button" data-mode="region" aria-pressed="false">Region</button>
-        </div>
-      </div>
-      <div class="list" id="list"></div>
-    </aside>
+    </div>
   </main>
+
+  <section class="listview" id="listview" aria-label="All provinces">
+    <div class="list" id="list"></div>
+    <div class="listhead">
+      <input id="q" type="search" placeholder="Find a province" autocomplete="off" autocapitalize="none">
+      <span class="n mono" id="qn"></span>
+      <div class="seg" id="groupby" role="group" aria-label="Group the list by">
+        <button type="button" data-mode="island" aria-pressed="true">Island</button>
+        <button type="button" data-mode="region" aria-pressed="false">Region</button>
+      </div>
+    </div>
+  </section>
 
   <section class="photos" id="photos" aria-label="Photos by province">
     <div class="sortbar">
@@ -123,6 +121,12 @@
     </div>
     <div id="photosheet"></div>
   </section>
+
+  <nav class="tabs" id="viewseg" aria-label="What to show">
+    <button type="button" data-view="map" aria-pressed="true"><b>Map</b></button>
+    <button type="button" data-view="list" aria-pressed="false"><b>List</b></button>
+    <button type="button" data-view="photos" aria-pressed="false"><b>Photos</b><em class="mono" id="viewcount">0</em></button>
+  </nav>
 </div>
 <div id="toast" role="status"></div>
 
@@ -175,10 +179,12 @@
       <dt>Stamping</dt>
       <dd><b>Stamp a province</b> by tapping it on the map to open its panel, picking the day you
         went in <b>Date</b>, then <b>Stamped</b>. A stamp always sits on a dated day,
-        so an empty date is asked for before the stamp goes on. Every row in the list carries the same
-        three choices &mdash; <b>Not visited</b>, <b>Planned</b> and <b>Stamped</b>. A province that is
-        already dated changes straight away; one with no date yet opens its panel to ask for the day
-        first. Tapping the province&rsquo;s name opens its panel.
+        so an empty date is asked for before the stamp goes on. In <b>List</b>, the square at the start of
+        each row stamps the province, and tapping it again takes the stamp off. A province that is
+        already dated changes straight away; one with no date yet opens its panel in the row to ask for
+        the day first. Tapping the province&rsquo;s name opens its panel right there in the list, with the same
+        status, date and photo controls as on the map; tap the name again to close it. Tapping the
+        photo opens it full screen.
         <small>Stamped provinces turn green on the map and in the list. The count,
         the percentage and the island bars all follow along.</small></dd>
 
@@ -189,15 +195,13 @@
         you are working on.</small></dd>
 
       <dt>The list</dt>
-      <dd><b>Work the list</b> by typing part of a name in <b>Find a province</b> to narrow it,
-        and switching between <b>Island</b> and <b>Region</b> to group it by island group
-        or by administrative region.</dd>
-      <dd><b>Fold the list away</b> on a phone by tapping <b>All provinces</b> at the top of it.
-        It starts folded on a narrow screen, with the count shown alongside, and the map takes
-        the height the list gives up. Tap it again to bring the list back.</dd>
+      <dd><b>Open the list</b> with <b>List</b> next to Map and Photos. Every province is there
+        with its status and its date. Type part of a name in <b>Find a province</b> to narrow it,
+        and switch between <b>Island</b> and <b>Region</b> to group it by island group or by
+        administrative region. On a phone these sit at the bottom of the screen, just above the tabs.</dd>
 
       <dt>Your log</dt>
-      <dd><b>Name your log</b> with a nickname in the field under the counter. Put in
+      <dd><b>Name your log</b> with a nickname in the stats on the map &mdash; tap the counter to open them. Put in
         <i>Abi&rsquo;s</i> and the log is titled <i>Abi&rsquo;s StampLogs</i> &mdash; on the page,
         in the browser tab, and as the heading on the saved image. The nickname travels inside
         the saved file too.
@@ -221,14 +225,14 @@
         <b>Planned</b> &mdash; so the map never shows a day you went without a stamp on it.
         <small>A province you have planned but not yet stamped is drawn in clay on the map, so a
         trip you have laid out reads at a glance against the green of the ones behind you. Stamp it
-        and it turns green. Untick <b>Show planned provinces</b> in the sidebar to leave the plans out
+        and it turns green. Untick <b>Show planned provinces</b> in the stats on the map to leave the plans out
         of the map, the list and the saved image &mdash; the dates themselves stay where they are.
         The date is yours to set and is separate from the stamp date, which is simply the day the
         stamp went on. It is saved with the log and comes back when you load one. The date survives
         the stamp coming off, as a plan &mdash; empty the field to clear it.</small></dd>
 
       <dt>Photos</dt>
-      <dd><b>See every photo at once</b> with <b>Photos</b> in the bar under the header. It lays
+      <dd><b>See every photo at once</b> with <b>Photos</b> next to Map and List. It lays
         your log out as a contact sheet, one thumbnail per province, grouped by <b>Island</b>,
         by <b>Region</b> or in <b>A&ndash;Z</b> order. Tapping a thumbnail opens that photo on its own,
         fitted to the width of the screen, with the province, its date and <b>Remove photo</b> under it.
@@ -257,6 +261,9 @@
       <dd><b>Tools</b> at the top right holds those buttons &mdash; Save file, Save image, Load file,
         Clear and About &mdash; along with this page, so the header stays a single row. The menu
         closes when you pick something, tap away from it, or press Escape.</dd>
+      <dd><b>Map</b>, <b>List</b> and <b>Photos</b> sit in a bar along the bottom edge, and each view&rsquo;s own
+        controls sit just above it: the counter on the map, which you pull up for the island bars,
+        the planned switch and the nickname; search and grouping on the list; grouping on the photos.</dd>
       <dd>The map is fitted into the band above an open province panel, so the panel never covers
         the province you are looking at. The panel itself is a sheet on the bottom edge of the map,
         with the status and the date held at the top of it and the photo scrolling underneath, and

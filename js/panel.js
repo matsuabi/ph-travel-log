@@ -1,5 +1,9 @@
 /* ── province callout ── */
 const provBox = document.getElementById('provbox');
+/* the same panel serves both views: a callout on the map, or opened in place under
+   a row of the list. provRow is that row while it is open in the list. */
+const provHome = provBox.parentNode;
+let provRow = null;
 const leadSvg = document.getElementById('lead');
 const leadLine = document.getElementById('lead-line');
 const leadDot = document.getElementById('lead-dot');
@@ -11,7 +15,7 @@ function showLead(on){
   if(on) leadSvg.removeAttribute("hidden"); else leadSvg.setAttribute("hidden","");
 }
 function drawLead(){
-  if(!sheetProv || provBox.hidden || !sheetProv.c){ showLead(false); return; }
+  if(!sheetProv || provBox.hidden || provRow || !sheetProv.c){ showLead(false); return; }
   const s = els.stage.getBoundingClientRect(), c = provBox.getBoundingClientRect();
   showLead(true);
   if(c.width < 40 || getComputedStyle(leadSvg).display === "none"){ showLead(false); return; }
@@ -38,7 +42,16 @@ async function repaintProv(){
   await paintSheetPhoto();
 }
 
-async function openProv(p){
+/* row: open the panel in place under that row of the list, and stay on the list */
+async function openProv(p, row){
+  if(provRow) undockProv();
+  if(row){
+    provRow = row;
+    row.dataset.open = "1";
+    row.querySelector('.open').setAttribute('aria-expanded', 'true');
+    provBox.classList.add('inrow');
+    row.after(provBox);
+  } else if(mainView !== "map") setView("map");
   sheetProv = p;
   wantStamp = false;
   pendingKind = null;
@@ -47,9 +60,21 @@ async function openProv(p){
   paintProvState();
   paintTrip();
   provBox.hidden = false;
-  relayout();
+  if(!provRow) relayout();
   await paintSheetPhoto();
-  document.getElementById('prov-close').focus({preventScroll:true});
+  if(provRow){
+    const b = tripKind.querySelector('button[aria-pressed="true"]') || tripKind.querySelector('button');
+    b.focus({preventScroll:true});
+  } else document.getElementById('prov-close').focus({preventScroll:true});
+}
+/* put the panel back on the map, where its callout lives */
+function undockProv(){
+  if(!provRow) return;
+  provRow.dataset.open = "0";
+  provRow.querySelector('.open').setAttribute('aria-expanded', 'false');
+  provRow = null;
+  provBox.classList.remove('inrow');
+  provHome.appendChild(provBox);
 }
 async function paintSheetPhoto(){
   const slot = document.getElementById('prov-slot');
@@ -75,6 +100,8 @@ async function paintSheetPhoto(){
     frame.appendChild(img);
     slot.appendChild(frame);
     img.onload = drawLead;
+    /* in the list the photo is a thumbnail, so a tap opens it full screen */
+    img.onclick = ()=>{ if(provRow && sheetProv) openPhotoFull(sheetProv); };
     rm.hidden = false; add.hidden = false; addtxt.textContent = "Replace";
   } else {
     const d = document.createElement('div');
@@ -198,8 +225,8 @@ function askForKind(kind){
   tripTag.textContent = kind === "traveled" ? "went" : "going";
   askForDate(kind === "traveled" ? STAMP_ASK : PLAN_ASK);
 }
-/* the list's three buttons: a province already dated changes on the spot, and one
-   with no date yet opens its panel to ask for the day first */
+/* the list's stamp square: a province already dated changes on the spot, and one
+   with no date yet opens its panel in the row to ask for the day first */
 function setStatus(p, kind){
   if(kind === statusOf(p)) return;
   if(kind === "none"){ clearProv(p); return; }
@@ -209,15 +236,21 @@ function setStatus(p, kind){
     return;
   }
   setHot(p);
-  openProv(p).then(()=>{ if(sheetProv === p) askForKind(kind); });
+  if(sheetProv === p && !provBox.hidden){ askForKind(kind); return; }
+  const row = mainView === "list" ? els.list.querySelector('.row[data-id="'+p.id+'"]') : null;
+  openProv(p, row).then(()=>{ if(sheetProv === p) askForKind(kind); });
 }
 
 function closeProv(){
+  const wasRow = !!provRow;
+  const back = wasRow ? provRow.querySelector('.open') : null;
   provBox.hidden = true; showLead(false);
+  undockProv();
   wantStamp = false;
   pendingKind = null;
   dropSheetURL(); sheetProv = null;
-  relayout();
+  if(back) back.focus({preventScroll:true});
+  if(!wasRow) relayout();
 }
 document.getElementById('prov-close').onclick = closeProv;
 
@@ -261,7 +294,7 @@ if(window.ResizeObserver){
   let lastH = 0;
   new ResizeObserver(()=>{
     const h = Math.round(provBox.getBoundingClientRect().height);
-    if(provBox.hidden || Math.abs(h - lastH) < 2) return;
+    if(provBox.hidden || provRow || Math.abs(h - lastH) < 2) return;
     lastH = h; relayout();
   }).observe(provBox);
 }
