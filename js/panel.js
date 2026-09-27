@@ -8,6 +8,19 @@ const leadSvg = document.getElementById('lead');
 const leadLine = document.getElementById('lead-line');
 const leadDot = document.getElementById('lead-dot');
 let sheetProv = null, sheetURL = null;
+/* on a phone the sheet opens compact (status + date) and expands for the photo.
+   peekH is the compact height, which the map is fitted above. */
+let provFull = false, peekH = 0;
+const provMore = document.getElementById('prov-more');
+const provMoreTxt = document.getElementById('prov-moretxt');
+function setFull(on){
+  provFull = !!on;
+  provBox.dataset.full = provFull ? "1" : "0";
+  provMore.setAttribute('aria-expanded', provFull ? 'true' : 'false');
+  drawLead();
+}
+provMore.onclick = ()=> setFull(!provFull);
+document.getElementById('prov-grip').onclick = ()=>{ if(!provMore.hidden || provFull) setFull(!provFull); };
 
 /* one line from the province to the callout's lower-left corner */
 function showLead(on){
@@ -15,7 +28,7 @@ function showLead(on){
   if(on) leadSvg.removeAttribute("hidden"); else leadSvg.setAttribute("hidden","");
 }
 function drawLead(){
-  if(!sheetProv || provBox.hidden || provRow || !sheetProv.c){ showLead(false); return; }
+  if(!sheetProv || provBox.hidden || provRow || !sheetProv.c || provFull){ showLead(false); return; }
   const s = els.stage.getBoundingClientRect(), c = provBox.getBoundingClientRect();
   showLead(true);
   if(c.width < 40 || getComputedStyle(leadSvg).display === "none"){ showLead(false); return; }
@@ -35,6 +48,10 @@ function paintProvState(){
   const on = !!(sheetProv && visited[sheetProv.id]);
   /* a photo belongs to a stamp, so its controls wait for one */
   document.getElementById('prov-photoact').hidden = !on;
+  /* the expanded sheet holds the photo, so it is offered once there is a stamp */
+  provMore.hidden = !on;
+  provMoreTxt.textContent = sheetProv && photoIds.has(String(sheetProv.id)) ? "Photo" : "Add photo";
+  if(!on && provFull) setFull(false);
 }
 async function repaintProv(){
   paintProvState();
@@ -53,6 +70,7 @@ async function openProv(p, row){
     row.after(provBox);
   } else if(mainView !== "map") setView("map");
   sheetProv = p;
+  setFull(false);
   wantStamp = false;
   pendingKind = null;
   document.getElementById('prov-h').textContent = p.name;
@@ -100,8 +118,10 @@ async function paintSheetPhoto(){
     frame.appendChild(img);
     slot.appendChild(frame);
     img.onload = drawLead;
-    /* in the list the photo is a thumbnail, so a tap opens it full screen */
-    img.onclick = ()=>{ if(provRow && sheetProv) openPhotoFull(sheetProv); };
+    /* in the list, and in the phone sheet, the photo is a thumbnail, so a tap opens it full screen */
+    img.onclick = ()=>{
+      if(sheetProv && (provRow || matchMedia('(max-width:600px)').matches)) openPhotoFull(sheetProv);
+    };
     rm.hidden = false; add.hidden = false; addtxt.textContent = "Replace";
   } else {
     const d = document.createElement('div');
@@ -245,6 +265,7 @@ function closeProv(){
   const wasRow = !!provRow;
   const back = wasRow ? provRow.querySelector('.open') : null;
   provBox.hidden = true; showLead(false);
+  setFull(false);
   undockProv();
   wantStamp = false;
   pendingKind = null;
@@ -266,6 +287,7 @@ document.getElementById('prov-file').onchange = async e=>{
     const rec = await makePhoto(p.id, f);
     await photoPut(rec);
     photoIds.add(String(p.id));
+    if(sheetProv === p) paintProvState();
     await askPersist();
     paintPhotoMarks();
     if(hot === p){ hot = null; setHot(p); }
@@ -281,6 +303,7 @@ document.getElementById('prov-rmphoto').onclick = async ()=>{
   const p = sheetProv;
   try{
     await photoDel(p.id); photoIds.delete(String(p.id));
+    if(sheetProv === p) paintProvState();
     paintPhotoMarks();
     if(hot === p){ hot = null; setHot(p); }
     await paintSheetPhoto();
@@ -294,7 +317,7 @@ if(window.ResizeObserver){
   let lastH = 0;
   new ResizeObserver(()=>{
     const h = Math.round(provBox.getBoundingClientRect().height);
-    if(provBox.hidden || provRow || Math.abs(h - lastH) < 2) return;
+    if(provBox.hidden || provRow || provFull || Math.abs(h - lastH) < 2) return;
     lastH = h; relayout();
   }).observe(provBox);
 }

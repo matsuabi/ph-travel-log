@@ -46,8 +46,11 @@ function fit(){
   /* under 600px the callout is a sheet on the bottom edge: fit the whole
      map into the band above it and align it to the top, so no province is
      covered and the lead line can always reach the one that is open */
+  /* the fit is taken from the compact sheet: expanding it for the photo lays it
+     over the map rather than shrinking the map again */
   const sheetH = (w <= 600 && provBox && !provBox.hidden)
-    ? Math.round(provBox.getBoundingClientRect().height || 162) : 0;
+    ? (provFull && peekH ? peekH : Math.round(provBox.getBoundingClientRect().height || 162)) : 0;
+  if(sheetH && !provFull) peekH = sheetH;
   els.stage.style.setProperty('--sheet-h', sheetH + 'px');
   const inset = sheetH ? sheetH + 22 : 0;
   const availH = h - inset;

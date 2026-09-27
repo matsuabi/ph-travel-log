@@ -129,6 +129,19 @@ files would not satisfy.
 
 ## Log
 
+### 1.14.0 — 2026-09-27
+
+- Changed: on phones the province panel opens **compact**, showing just the status
+  and date, so the map keeps most of the screen.
+- Added: a **Photo** / **Add photo** row, and a tap on the grip, expand the panel
+  to show the photo once the province is stamped.
+- Changed: in the expanded panel the photo is a thumbnail with **Replace** and
+  **Remove** beside it, like a list row, and a tap opens it full screen.
+- Changed: expanding the panel lays it over the map instead of refitting the map,
+  and the lead line hides while it is open.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
+
 ### 1.13.0 — 2026-09-26
 
 - Added: a **StampLogs wordmark** in the header — *Stamp* in the serif, *logs* in

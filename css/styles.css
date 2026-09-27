@@ -180,6 +180,8 @@ main{order:2;flex:1;min-height:0;display:flex;flex-direction:column;position:rel
 .callout header .rg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A9A79D}
 .callout .grip{display:none;justify-content:center;padding:8px 0 0;flex:none}
 .callout .grip span{width:44px;height:4px;border-radius:2px;background:var(--rule);display:block}
+/* the sheet's expand control only exists on a phone */
+.callout .pmore{display:none}
 .callout .x{
   margin-left:auto;border:0;background:none;font-size:20px;line-height:1;
   color:var(--ink-2);cursor:pointer;padding:0 2px;height:24px;
@@ -609,13 +611,34 @@ button.calday:focus-visible{outline:2px solid var(--clay);outline-offset:1px}
      everything in it reachable without a scroll inside a scroll */
   /* the panel is a sheet on the bottom edge of the map: full width, a fixed
      height, and only the photo area inside it scrolls */
+  /* compact by default: status and date only, so the map keeps most of the
+     screen; the photo opens with the grip or the Photo row */
   .callout{
     top:auto;left:0;right:0;bottom:0;width:auto;
-    height:min(360px,66%);max-height:none;
+    height:auto;max-height:none;
+    transition:height .3s cubic-bezier(.3,.7,.2,1);
     border-left:0;border-right:0;border-bottom:0;border-radius:0;
     box-shadow:0 -12px 34px rgba(27,29,26,.16);
   }
-  .callout .grip{display:flex}
+  .callout .grip{display:flex;cursor:pointer;padding:8px 0 4px}
+  .callout:not(.inrow) .pbody{display:none}
+  /* expanded: the sheet fits what it holds, with no empty band under the photo */
+  .callout:not(.inrow)[data-full="1"]{height:auto;max-height:80%}
+  .callout:not(.inrow)[data-full="1"] .pbody{display:flex;flex:0 1 auto}
+  /* the photo row copies the list's: a thumbnail, with Replace and Remove beside it */
+  .callout:not(.inrow)[data-full="1"] .pbody:has(.photoframe){display:grid;grid-template-columns:132px minmax(0,1fr);align-items:stretch;gap:10px}
+  .callout:not(.inrow) .pbody:has(.photoframe) .photoframe{aspect-ratio:auto !important;height:100px;min-height:0;max-height:none;cursor:zoom-in}
+  .callout:not(.inrow) .pbody:has(.photoframe) .photo{object-fit:cover}
+  .callout:not(.inrow) .pbody:has(.photoframe) .photoact{flex-direction:column;gap:8px;margin:0;padding:0}
+  .callout:not(.inrow) .pmore{
+    display:flex;align-items:center;gap:8px;flex:none;width:100%;
+    min-height:44px;padding:0 16px;border:0;border-top:1px solid var(--rule-2);
+    background:none;font:500 12px/1 var(--sans);color:var(--ink-2);cursor:pointer;
+  }
+  .callout .pmore[hidden]{display:none}
+  .callout .pmore em{font-style:normal;margin-left:auto}
+  .callout[data-full="1"] .pmore em{transform:rotate(180deg)}
+  .callout.inrow .pmore{display:none}
   .callout header{padding:9px 16px 10px}
   .callout h2{font-size:17px}
   .callout .x{font-size:26px;height:32px;padding:0 6px;margin-right:-4px}
