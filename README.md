@@ -19,7 +19,7 @@ python3 -m http.server 8000
 
 ## What it does
 
-- **Stamp provinces** by tapping one on the map and setting it **Not visited**,
+- **Stamp provinces** by tapping one on the map and setting it **Not yet**,
   **Planned** or **Stamped**. Planned and Stamped ask for a date first.
 - **Switch views** with the **Map**, **List**, **Photos** and **Calendar** tabs along the bottom.
 - **Work the list** — a square on each row stamps the province, the row shows its
@@ -30,8 +30,10 @@ python3 -m http.server 8000
 - **Group the list** by island group (Luzon / Visayas / Mindanao) or by the
   16 administrative regions.
 - **Search** the list by name.
-- **Name your log** with a nickname — `Abi's` titles it *Abi's PH travel log*,
-  on the page, in the browser tab, and on the exported image.
+- **Name your log** with a nickname — `Abi's` titles it *Abi's StampLogs*,
+  set in front of the wordmark on the page, in the browser tab, and on the exported image.
+- **Spot it in a tab** — the StampLogs stamp-dot mark is the favicon and the
+  home-screen icon.
 - **Date a trip** on any province, *Stamped* or *Planned* — the two are the same
   statement, so the toggle puts the stamp on and takes it off. Planned provinces
   are drawn in clay, and can be hidden.
@@ -50,7 +52,7 @@ python3 -m http.server 8000
   log has no nickname.
 - **Clear** the log, asking about stamps, dates and photos separately.
 
-A **How to use** sheet in the header explains all of it; **About** covers where the
+A short **Guide** in the header explains all of it; **About** covers where the
 log is kept, the count of 82, the boundary data and the terms.
 
 ## Files
@@ -71,7 +73,7 @@ log is kept, the count of 82, the boundary data and the terms.
 | `js/poster.js`        | **Save image**                                                    |
 | `js/zip.js`           | A small ZIP writer and reader                                     |
 | `js/log-file.js`      | **Save file** and **Load file**                                   |
-| `js/dialogs.js`       | Clear, How to use, About, Escape, and the phone tools menu        |
+| `js/dialogs.js`       | Clear, Guide, About, Escape, and the phone tools menu             |
 | `js/photos-view.js`   | The Photos contact sheet and the full-screen viewer               |
 | `js/calendar-view.js` | The Calendar view, the year picker and the day or month card      |
 | `js/main.js`          | Starts the app — loads last                                       |
@@ -126,6 +128,25 @@ the app version. Bump it only when the shape of the JSON changes in a way older
 files would not satisfy.
 
 ## Log
+
+### 1.13.0 — 2026-09-26
+
+- Added: a **StampLogs wordmark** in the header — *Stamp* in the serif, *logs* in
+  small caps, and a green stamp dot.
+- Changed: a nickname sits in front of the wordmark, so `Abi's` reads
+  *Abi's StampLogs*, and screen readers hear the full title.
+- Added: a **favicon** and an **Apple touch icon**, so the app is marked in the
+  browser tab and on a phone's home screen.
+- Added: logo files in `logo/` — the icon at 512px, and the wordmark for light
+  and dark backgrounds.
+- Changed: **How to use** is now a shorter **Guide** — one section each for
+  stamping, the four views, photos, making it yours, keeping a copy and the phone.
+- Changed: **Not visited** is now **Not yet**, in the panel and its toast.
+- Changed: About says the nickname is kept too, and that photos are shrunk and
+  stripped of location data; Save file is explained there.
+- Changed: the view tabs show just their names, without the small captions.
+
+Nothing else changes: saved files, storage keys and the file format are untouched.
 
 ### 1.12.0 — 2026-09-26
 

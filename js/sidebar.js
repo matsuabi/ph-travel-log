@@ -91,7 +91,8 @@ function paintRow(row, p){
   tick.setAttribute("aria-label", (st === "traveled" ? "Take the stamp off " : "Stamp ") + p.name);
 }
 function applyNick(){
-  els.h1.textContent = logTitle() || APP_NAME;
+  els.h1.querySelector('.wm-nick').textContent = nickname || "";
+  els.h1.setAttribute('aria-label', logTitle() || APP_NAME);
   document.title = logTitle() || APP_TITLE;
 }
 els.nick.addEventListener('input', ()=> setNick(els.nick.value));

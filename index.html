@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FBFAF6">
 <title>StampLogs — Plan and stamp your map</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="app">
   <header>
     <div class="wordmark">
-      <h1>StampLogs</h1>
+      <h1 aria-label="StampLogs"><span class="wm-nick"></span><span class="wm-stamp" aria-hidden="true">Stamp</span><span class="wm-logs" aria-hidden="true">logs</span><i class="wm-dot" aria-hidden="true"></i></h1>
       <span>Plan and stamp your map</span>
     </div>
     <div class="spacer"></div>
@@ -21,7 +24,7 @@
       <button class="ghost" id="png">Save image</button>
       <button class="ghost" id="import">Load file</button>
       <button class="ghost" id="reset">Clear</button>
-      <button class="ghost" id="help">How to use</button>
+      <button class="ghost" id="help">Guide</button>
       <button class="ghost" id="about">About</button>
     </div>
     <input type="file" id="file" accept=".json,.zip,application/json,application/zip" hidden>
@@ -54,7 +57,7 @@
         </header>
         <div class="pfixed">
           <div class="seg3" id="prov-kind" role="group" aria-label="Whether you have been">
-            <button type="button" data-kind="none" aria-pressed="true">Not visited</button>
+            <button type="button" data-kind="none" aria-pressed="true">Not yet</button>
             <button type="button" data-kind="planned" aria-pressed="false">Planned</button>
             <button type="button" data-kind="traveled" aria-pressed="false">Stamped</button>
           </div>
@@ -207,113 +210,42 @@
 <div class="scrim" id="helpbox" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="help-h">
     <header>
-      <h2 id="help-h">How to use</h2>
+      <h2 id="help-h">Guide</h2>
       <button class="x" id="help-close" aria-label="Close">&times;</button>
     </header>
     <dl>
-      <dt>Stamping</dt>
-      <dd><b>Stamp a province</b> by tapping it on the map to open its panel, picking the day you
-        went in <b>Date</b>, then <b>Stamped</b>. A stamp always sits on a dated day,
-        so an empty date is asked for before the stamp goes on. In <b>List</b>, the square at the start of
-        each row stamps the province, and tapping it again takes the stamp off. A province that is
-        already dated changes straight away; one with no date yet opens its panel in the row to ask for
-        the day first. Tapping the province&rsquo;s name opens its panel right there in the list, with the same
-        status, date and photo controls as on the map; tap the name again to close it. Tapping the
-        photo opens it full screen.
-        <small>Stamped provinces turn green on the map and in the list. The count,
-        the percentage and the island bars all follow along.</small></dd>
+      <dt>Stamp a province</dt>
+      <dd>Tap a province on the map, pick the day in <b>Date</b>, then choose
+        <b>Stamped</b> for a place you have been or <b>Planned</b> for a trip ahead.
+        <b>Not yet</b> clears it.
+        <small>Stamped provinces turn green and count toward your total; planned ones turn clay.
+        Both need a date first.</small></dd>
 
-      <dt>The map</dt>
-      <dd><b>Move the map</b> by dragging to pan, and scrolling or pinching to zoom.
-        The <b>+</b> and <b>&minus;</b> buttons zoom as well, and <b>FIT</b> returns to the whole archipelago.
-        <small>A line runs from the province you have open to its panel, so you can see which one
-        you are working on.</small></dd>
+      <dt>Views</dt>
+      <dd><b>Map</b> &mdash; drag to move, scroll or pinch to zoom. <b>FIT</b> shows the whole country.</dd>
+      <dd><b>List</b> &mdash; every province with its status and date. Search by name, or group by
+        island or region. Tick the square to stamp; tap a name to open its panel.</dd>
+      <dd><b>Photos</b> &mdash; all your photos on one sheet. Tap one to view it, swipe for the next.</dd>
+      <dd><b>Calendar</b> &mdash; each trip on its day. Tap a day or a month to see which provinces.</dd>
 
-      <dt>The list</dt>
-      <dd><b>Open the list</b> with <b>List</b> next to Map and Photos. Every province is there
-        with its status and its date. Type part of a name in <b>Find a province</b> to narrow it,
-        and switch between <b>Island</b> and <b>Region</b> to group it by island group or by
-        administrative region. On a phone these sit at the bottom of the screen, just above the tabs.</dd>
+      <dt>Add a photo</dt>
+      <dd>Open a stamped province and tap <b>Add photo</b>. One photo per province.
+        <small>Photos stay on this device and are never uploaded.</small></dd>
 
-      <dt>Your log</dt>
-      <dd><b>Name your log</b> with a nickname in the stats on the map &mdash; tap the counter to open them. Put in
-        <i>Abi&rsquo;s</i> and the log is titled <i>Abi&rsquo;s StampLogs</i> &mdash; on the page,
-        in the browser tab, and as the heading on the saved image. The nickname travels inside
-        the saved file too.
-        <small>It is kept in this browser like everything else. Leave it empty and the page
-        goes back to being called StampLogs.</small></dd>
+      <dt>Make it yours</dt>
+      <dd>Tap the counter on the map to open your stats. Add a <b>Nickname</b> to title your log
+        &mdash; <i>Abi&rsquo;s</i> makes it <i>Abi&rsquo;s StampLogs</i> &mdash; or untick
+        <b>Show planned provinces</b> to hide your plans.</dd>
 
-      <dt>Dates</dt>
-      <dd><b>Set where a province stands</b> in the panel that opens when you tap it:
-        <b>Not visited</b>, <b>Planned</b> or <b>Stamped</b>. Planned and stamped both sit on a
-        date, so an empty date is asked for before either goes on, and the date field carries a
-        <i>going</i> or <i>went</i> mark to say which it is. <b>Not visited</b> clears the province
-        and its date again.
-        <small>Any photo you added is kept while a province is not visited, and comes back when you
-        stamp it again.</small></dd>
-      <dd><b>Date the trip</b> in the panel that opens when you tap any province, stamped or not.
-        Pick a day in <b>Date</b>, then say whether it is a day you have <b>Planned</b> or a day you
-        have <b>Stamped</b>. A province you have not stamped starts on <b>Planned</b>, so a trip can be laid
-        out before you go, and a stamp cannot go on until a date is there to carry
-        it. <b>Stamped</b> and the stamp are one and the same: setting a date to
-        <b>Stamped</b> stamps the province, and taking the stamp off puts its date back to
-        <b>Planned</b> &mdash; so the map never shows a day you went without a stamp on it.
-        <small>A province you have planned but not yet stamped is drawn in clay on the map, so a
-        trip you have laid out reads at a glance against the green of the ones behind you. Stamp it
-        and it turns green. Untick <b>Show planned provinces</b> in the stats on the map to leave the plans out
-        of the map, the list and the saved image &mdash; the dates themselves stay where they are.
-        The date is yours to set and is separate from the stamp date, which is simply the day the
-        stamp went on. It is saved with the log and comes back when you load one. The date survives
-        the stamp coming off, as a plan &mdash; empty the field to clear it.</small></dd>
-
-      <dt>Photos</dt>
-      <dd><b>See every photo at once</b> with <b>Photos</b> next to Map and List. It lays
-        your log out as a contact sheet, one thumbnail per province, grouped by <b>Island</b>,
-        by <b>Region</b> or in <b>A&ndash;Z</b> order. Tapping a thumbnail opens that photo on its own,
-        fitted to the width of the screen, with the province, its date and <b>Remove photo</b> under it.
-        Swipe sideways to move through the rest of the sheet in the order it is grouped &mdash; the
-        counter at the top says where you are &mdash; and close it to come back where you left off.
-        <small>Only provinces holding a photo appear on the sheet, and the grouping you pick is
-        remembered.</small></dd>
-      <dd><b>Add a photo</b> from the panel of a province you have already stamped &mdash; the photo is
-        the one thing that waits for the stamp. One photo each,
-        picked from this device, with <b>Add photo</b> under the empty frame. Once a photo is in,
-        that same place offers <b>Remove photo</b> instead. Provinces holding a photo carry a small
-        dot in the list.
-        <small>Photos are kept in this browser and are never uploaded. They are shrunk on the way
-        in, which also strips the location and camera data your phone attaches to a picture.</small></dd>
-
-      <dt>Calendar</dt>
-      <dd><b>See your year at a glance</b> with <b>Calendar</b> next to Map, List and Photos. All twelve
-        months are laid out with every dated province on its day: green for stamped, clay for
-        planned, and split in two when a day holds both. A small number on a day says how many
-        provinces sit on it. Tap a coloured day to see which provinces they are, or a month&rsquo;s name
-        to see the whole month.
-        <small>Step through the years with the arrows, or tap the year to pick one of the ten before
-        or after this one. Plans follow <b>Show planned provinces</b>, the same as the map.</small></dd>
-
-      <dt>Keeping a copy</dt>
-      <dd><b>Keep a copy</b> with the buttons at the top. <b>Save file</b> writes your log out as a
-        JSON file, or a ZIP holding your photos alongside it, and <b>Load file</b> reads either
-        back in. <b>Save image</b> draws your map as a PNG to keep or post. <b>Clear</b> empties the
-        log, asking about stamps, dates and photos separately.
-        <small>Loading a file replaces whatever is currently stamped in this browser, so save a
-        copy first if you want to keep it. The saved file is also how you carry your log to
-        another device.</small></dd>
+      <dt>Keep a copy</dt>
+      <dd><b>Save file</b> backs up your log, photos included. <b>Load file</b> brings it back, on
+        this device or another. <b>Save image</b> makes a picture of your map to share.
+        <b>Clear</b> starts over.
+        <small>Loading a file replaces your current log, so save first.</small></dd>
 
       <dt>On a phone</dt>
-      <dd><b>Tools</b> at the top right holds those buttons &mdash; Save file, Save image, Load file,
-        Clear and About &mdash; along with this page, so the header stays a single row. The menu
-        closes when you pick something, tap away from it, or press Escape.</dd>
-      <dd><b>Map</b>, <b>List</b>, <b>Photos</b> and <b>Calendar</b> sit in a bar along the bottom edge, and each view&rsquo;s own
-        controls sit just above it: the counter on the map, which you pull up for the island bars,
-        the planned switch and the nickname; search and grouping on the list; grouping on the photos;
-        the year on the calendar.</dd>
-      <dd>The map is fitted into the band above an open province panel, so the panel never covers
-        the province you are looking at. The panel itself is a sheet on the bottom edge of the map,
-        with the status and the date held at the top of it and the photo scrolling underneath, and
-        the zoom buttons sit just above it. Close the panel and the map settles back into the
-        whole space.</dd>
+      <dd>The top buttons live in <b>Tools</b> at the top right, and the views sit in the bar
+        along the bottom.</dd>
     </dl>
   </div>
 </div>
@@ -327,10 +259,14 @@
     <dl>
       <dt>Where your log is kept</dt>
       <dd>In this browser, on this device. Nothing is uploaded and there is no account.
-        Stamps sit in local storage and photos in this browser's database.
+        Stamps, dates and your nickname sit in local storage, and photos in this browser's database.
         <small>Clearing your browser data will erase both, and a browser short of room may
-        discard the photos. <b>Save file</b> is your only real backup — use it to keep a copy
-        and to carry your map to another device.</small></dd>
+        discard the photos.</small></dd>
+      <dd>Photos are shrunk when you add them, which also strips the location and camera
+        data your phone attaches to a picture.</dd>
+      <dd><b>Save file</b> is your only real backup. It writes a JSON file, or a ZIP with
+        your photos alongside it, and carries your nickname too.
+        <small>Load that file on another device to carry your map there.</small></dd>
 
       <dt>The count of 82</dt>
       <dd>This map follows the 2023 Philippine Standard Geographic Code list of provinces,

@@ -25,8 +25,12 @@ header{
   padding-top:max(16px, env(safe-area-inset-top));
 }
 .wordmark{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.wordmark h1{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.005em;margin:0}
-.wordmark span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.wordmark h1{display:flex;align-items:baseline;gap:2px;font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.005em;margin:0;white-space:nowrap}
+.wordmark h1 .wm-nick:empty{display:none}
+.wordmark h1 .wm-nick{margin-right:.28em}
+.wordmark h1 .wm-logs{font-family:var(--sans);font-size:.41em;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+.wordmark h1 .wm-dot{width:.24em;height:.24em;border-radius:50%;background:var(--visited);margin-left:.1em;align-self:baseline}
+.wordmark > span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
 header .spacer{flex:1}
 .tools{display:flex;gap:6px;align-self:center;flex-wrap:wrap}
 #tools-toggle{display:none}
@@ -378,10 +382,9 @@ main{order:2;flex:1;min-height:0;display:flex;flex-direction:column;position:rel
 .tabs button:first-child{border-radius:2px 0 0 2px}
 .tabs button:last-child{border-radius:0 2px 2px 0}
 .tabs button b{font-weight:500}
-.tabs button em{font-style:normal;font-size:10.5px;letter-spacing:.02em;color:#A9A79D}
+.tabs button em{display:none}
 .tabs button:hover{color:var(--clay)}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.tabs button[aria-pressed="true"] em{color:#A7ADA4}
 .photos{order:2;display:none;flex:1;flex-direction:column;min-height:0}
 #photosheet{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 body[data-view="list"] .listview,body[data-view="photos"] .photos{display:flex}
@@ -586,8 +589,8 @@ button.calday:focus-visible{outline:2px solid var(--clay);outline-offset:1px}
 @media (max-width:600px){
   header{padding:14px 18px 12px;gap:10px;flex-wrap:wrap}
   header .spacer{display:none}
-  .wordmark h1{font-size:17px}
-  .wordmark span{display:none}
+  .wordmark h1{font-size:18px}
+  .wordmark > span{display:none}
   #tools-toggle{display:flex;margin-left:auto}
   .tools{
     position:absolute;right:18px;top:64px;width:198px;z-index:7;
@@ -636,7 +639,6 @@ button.calday:focus-visible{outline:2px solid var(--clay);outline-offset:1px}
   }
   .tabs button:first-child,.tabs button:last-child{border-radius:0}
   .tabs button + button{border-left:1px solid var(--rule-2)}
-  .tabs button em{display:none}
   .tabs button[aria-pressed="true"]{
     background:transparent;color:var(--ink);border-color:var(--rule-2);box-shadow:inset 0 2px 0 var(--ink);
   }

@@ -204,7 +204,7 @@ function clearProv(p = sheetProv){
     paintProvState(); paintTrip(); paintSheetPhoto();
   }
   /* the photo itself is left in place, so stamping again brings it back */
-  if(had) toast(p.name + " set back to not visited");
+  if(had) toast(p.name + " set back to Not yet");
 }
 tripKind.onclick = e=>{
   const b = e.target.closest('button'); if(!b || !sheetProv) return;
